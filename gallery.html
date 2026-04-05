@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery – UTOL Schools</title>
+  <meta name="description" content="Browse photos and memories from life at UTOL Schools — events, sports, academics and more." />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .lightbox { display:none;position:fixed;inset:0;background:rgba(3,4,94,0.92);z-index:9000;align-items:center;justify-content:center; }
+    .lightbox.open { display:flex; }
+    .lightbox-inner { text-align:center;padding:24px;max-width:600px; }
+    .lightbox-emoji { font-size:8rem;line-height:1;display:block;margin-bottom:16px; }
+    .lightbox-caption { color:#fff;font-size:1rem;font-weight:600;font-family:'Nunito',sans-serif; }
+    .lightbox-close { position:absolute;top:24px;right:28px;background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:1.5rem;width:44px;height:44px;border-radius:50%;cursor:pointer; }
+    .lightbox-prev,.lightbox-next { position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:1.4rem;width:48px;height:48px;border-radius:50%;cursor:pointer;transition:0.3s; }
+    .lightbox-prev { left:20px; }
+    .lightbox-next { right:20px; }
+    .lightbox-prev:hover,.lightbox-next:hover { background:rgba(244,199,10,0.3); }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     ANNOUNCEMENT BAR
+============================================================ -->
+<div class="announcement-bar" role="marquee" aria-label="School announcements">
+  <div class="announcement-track">
+    <div class="announcement-item"><span class="ann-dot"></span>&#127881; Enrolment is NOW OPEN for the 2025/2026 Academic Year &mdash; <a href="admissions.html">Apply Today</a></div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#128197; Term 3 resumes Monday, 9th September 2025 &mdash; Welcome back, UTOL family!</div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#127942; UTOL wins Best Primary School Award 2024 &mdash; Congratulations to our students &amp; staff!</div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#128222; Admissions Enquiries: <a href="tel:08059714287">0805 971 4287</a></div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#128336; School Hours: Mon&ndash;Thu 7:30am&ndash;3:00pm &nbsp;|&nbsp; Fri 7:30am&ndash;1:00pm</div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#127968; Visit us at 7/9 Jemimat Laalu Street, Arepo, Ogun State</div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#127881; Enrolment is NOW OPEN for the 2025/2026 Academic Year &mdash; <a href="admissions.html">Apply Today</a></div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#128197; Term 3 resumes Monday, 9th September 2025 &mdash; Welcome back, UTOL family!</div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#127942; UTOL wins Best Primary School Award 2024 &mdash; Congratulations to our students &amp; staff!</div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#128222; Admissions Enquiries: <a href="tel:08059714287">0805 971 4287</a></div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#128336; School Hours: Mon&ndash;Thu 7:30am&ndash;3:00pm &nbsp;|&nbsp; Fri 7:30am&ndash;1:00pm</div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#127968; Visit us at 7/9 Jemimat Laalu Street, Arepo, Ogun State</div>
+  </div>
+</div>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <div class="nav-logo-icon"><img src="images/logo.jpeg" alt="UTOL Schools Logo" /></div>
+        <div class="nav-logo-text"><strong>UTOL Schools</strong><span>Excellence in Education</span></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="academics.html">Academics</a></li>
+        <li><a href="admissions.html">Admissions</a></li>
+        <li><a href="news.html">News &amp; Events</a></li>
+        <li><a href="gallery.html" class="active">Gallery</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="portal/login.html?portal=1" class="nav-portal-btn">Portal Login</a></li>
+      </ul>
+      <button class="nav-hamburger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <section class="page-header">
+    <div class="container">
+      <div class="breadcrumb"><a href="index.html">Home</a><span>/</span><span>Gallery</span></div>
+      <h1>Photo Gallery</h1>
+      <p>A glimpse into the vibrant life of UTOL Schools.</p>
+    </div>
+  </section>
+
+  <section class="section-pad">
+    <div class="container">
+      <div class="text-center" style="margin-bottom:32px;">
+        <span class="section-tag">Our Memories</span>
+        <h2 class="section-title">Life at UTOL Schools</h2>
+        <p class="section-subtitle">Browse photos from events, sports days, classroom activities and much more.</p>
+      </div>
+
+      <!-- Filter -->
+      <div class="gallery-filter">
+        <button class="tab-btn active" data-filter="all">All Photos</button>
+        <button class="tab-btn" data-filter="academics">Academics</button>
+        <button class="tab-btn" data-filter="sports">Sports</button>
+        <button class="tab-btn" data-filter="events">Events</button>
+        <button class="tab-btn" data-filter="arts">Arts &amp; Culture</button>
+        <button class="tab-btn" data-filter="campus">Campus</button>
+      </div>
+
+      <div class="gallery-page-grid">
+        <div class="gallery-page-item" data-category="events" data-caption="Annual Cultural Day 2024">&#127808;<div class="gallery-overlay">&#128269;</div></div>
+        <div class="gallery-page-item" data-category="sports" data-caption="Interhouse Sports Festival">&#9917;<div class="gallery-overlay">&#128269;</div></div>
+        <!-- Real photo: Nursery classroom -->
+        <div class="gallery-page-item" data-category="academics" data-caption="Our Nursery Classroom in Action" data-img="images/gallery1.jpeg"><img class="gal-img" src="images/gallery1.jpeg" alt="Nursery classroom with children at colourful tables" /><div class="gallery-overlay">&#128269;</div></div>
+        <div class="gallery-page-item" data-category="arts" data-caption="School Drama Production">&#127914;<div class="gallery-overlay">&#128269;</div></div>
+        <div class="gallery-page-item" data-category="academics" data-caption="Coding &amp; Robotics Club">&#129302;<div class="gallery-overlay">&#128269;</div></div>
+        <!-- Real photo: Students in school uniform -->
+        <div class="gallery-page-item" data-category="events" data-caption="Prize Giving Day 2024 – Our Proud Students" data-img="images/gallery2.jpeg"><img class="gal-img" src="images/gallery2.jpeg" alt="UTOL students in school uniform group photo" /><div class="gallery-overlay">&#128269;</div></div>
+        <div class="gallery-page-item" data-category="arts" data-caption="Art &amp; Craft Exhibition">&#127912;<div class="gallery-overlay">&#128269;</div></div>
+        <div class="gallery-page-item" data-category="sports" data-caption="Basketball Championship">&#127936;<div class="gallery-overlay">&#128269;</div></div>
+        <!-- Real photo: Educational toys and learning materials -->
+        <div class="gallery-page-item" data-category="academics" data-caption="Our Well-Stocked Learning Resources Room" data-img="images/gallery3.jpeg"><img class="gal-img" src="images/gallery3.jpeg" alt="Shelves of colourful educational toys and learning materials" /><div class="gallery-overlay">&#128269;</div></div>
+        <!-- Real photo: School building exterior -->
+        <div class="gallery-page-item" data-category="campus" data-caption="UTOL Schools – Main Campus Building" data-img="images/gallery4.jpeg"><img class="gal-img" src="images/gallery4.jpeg" alt="UTOL Schools main campus building exterior with lawn" /><div class="gallery-overlay">&#128269;</div></div>
+        <div class="gallery-page-item" data-category="events" data-caption="P6 Graduation Ceremony">&#127891;<div class="gallery-overlay">&#128269;</div></div>
+        <div class="gallery-page-item" data-category="sports" data-caption="Athletics Day on the Track">&#127939;<div class="gallery-overlay">&#128269;</div></div>
+        <div class="gallery-page-item" data-category="arts" data-caption="School Choir Performance">&#127929;<div class="gallery-overlay">&#128269;</div></div>
+        <div class="gallery-page-item" data-category="campus" data-caption="Our Beautiful Playground">&#127966;<div class="gallery-overlay">&#128269;</div></div>
+        <div class="gallery-page-item" data-category="academics" data-caption="Mathematics Olympiad Prep">&#10135;&#65039;<div class="gallery-overlay">&#128269;</div></div>
+        <div class="gallery-page-item" data-category="events" data-caption="Open Day 2025">&#128101;<div class="gallery-overlay">&#128269;</div></div>
+        <div class="gallery-page-item" data-category="campus" data-caption="Cafeteria &amp; Dining Area">&#127869;<div class="gallery-overlay">&#128269;</div></div>
+        <div class="gallery-page-item" data-category="sports" data-caption="Football League Finals">&#129352;<div class="gallery-overlay">&#128269;</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIDEO SECTION -->
+  <section class="section-pad" style="background:var(--light)">
+    <div class="container">
+      <div class="text-center">
+        <span class="section-tag">Videos</span>
+        <h2 class="section-title">Watch Our Story</h2>
+        <p class="section-subtitle">See UTOL Schools in action through our videos and virtual tour.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:36px;">
+        <div style="aspect-ratio:16/9;background:linear-gradient(135deg,var(--navy),#1a1aad);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;">
+          <div style="width:60px;height:60px;background:rgba(244,199,10,0.9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">&#9654;&#65039;</div>
+          <div style="position:absolute;bottom:16px;left:16px;color:#fff;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;">Campus Virtual Tour</div>
+        </div>
+        <div style="aspect-ratio:16/9;background:linear-gradient(135deg,#2E7D32,#1b5e20);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;">
+          <div style="width:60px;height:60px;background:rgba(244,199,10,0.9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">&#9654;&#65039;</div>
+          <div style="position:absolute;bottom:16px;left:16px;color:#fff;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;">Sports Day Highlights</div>
+        </div>
+        <div style="aspect-ratio:16/9;background:linear-gradient(135deg,#a07800,#F4C70A);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;">
+          <div style="width:60px;height:60px;background:rgba(3,4,94,0.8);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">&#9654;&#65039;</div>
+          <div style="position:absolute;bottom:16px;left:16px;color:var(--navy);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;">Graduation 2024</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose">&times;</button>
+    <button class="lightbox-prev" id="lightboxPrev">&#8249;</button>
+    <div class="lightbox-inner" style="max-width:720px;width:90vw;">
+      <div id="lightboxMedia" style="margin-bottom:16px;"></div>
+      <p class="lightbox-caption" id="lightboxCaption"></p>
+    </div>
+    <button class="lightbox-next" id="lightboxNext">&#8250;</button>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand"><a href="index.html" class="nav-logo"><div class="nav-logo-icon"><img src="images/logo.jpeg" alt="UTOL Schools Logo" /></div><div class="nav-logo-text"><strong style="color:#fff">UTOL Schools</strong><span>Excellence in Education</span></div></a><p>Inspiring young minds since 2000.</p><div class="footer-socials"><a href="#" class="social-btn">&#128241;</a><a href="#" class="social-btn">&#128247;</a><a href="#" class="social-btn">&#128488;</a><a href="#" class="social-btn">&#127909;</a></div></div>
+        <div class="footer-col"><h4>Quick Links</h4><ul class="footer-links"><li><a href="about.html">About Us</a></li><li><a href="academics.html">Academics</a></li><li><a href="admissions.html">Admissions</a></li><li><a href="news.html">News &amp; Events</a></li><li><a href="gallery.html">Gallery</a></li><li><a href="faq.html">FAQ</a></li></ul></div>
+        <div class="footer-col"><h4>School Life</h4><ul class="footer-links"><li><a href="#">School Calendar</a></li><li><a href="#">Uniform Policy</a></li><li><a href="#">School Rules</a></li><li><a href="portal/login.html?portal=1">Parent Portal</a></li></ul></div>
+        <div class="footer-col"><h4>Contact Us</h4><ul class="footer-contact"><li><span class="ci">&#128205;</span>12 Education Avenue, Victoria Island, Lagos</li><li><span class="ci">&#128222;</span>+234 800 UTOL 001</li><li><span class="ci">&#128140;</span>info@utolschools.edu.ng</li><li><span class="ci">&#128336;</span>Mon–Fri: 7:30am – 4:30pm</li></ul></div>
+      </div>
+      <div class="footer-bottom"><span>&copy; 2025 UTOL Schools. All rights reserved.</span><span>Designed with &#10084;&#65039; for young learners</span></div>
+    </div>
+  </footer>
+
+<!-- ============================================================
+     FLOATING WHATSAPP BUTTON
+============================================================ -->
+<a
+  href="https://wa.me/2348059714287?text=Hello%2C%20I%20have%20a%20question%20about%20UTOL%20Schools."
+  class="whatsapp-fab"
+  target="_blank"
+  rel="noopener"
+  aria-label="Chat with UTOL Schools on WhatsApp"
+  title="Chat with us on WhatsApp"
+>
+  <span class="wa-icon">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M14 0C6.268 0 0 6.268 0 14c0 2.467.638 4.784 1.755 6.793L0 28l7.415-1.727A13.94 13.94 0 0014 28c7.732 0 14-6.268 14-14S21.732 0 14 0z" fill="#fff" fill-opacity=".15"/>
+      <path d="M20.52 17.48c-.31-.16-1.84-.91-2.12-1.01-.28-.1-.49-.16-.69.16-.2.31-.77.99-.95 1.19-.17.2-.35.22-.66.06-.31-.16-1.31-.48-2.49-1.54-.92-.82-1.54-1.84-1.72-2.15-.18-.31-.02-.48.13-.64.14-.14.31-.36.47-.54.16-.18.21-.31.32-.52.1-.2.05-.39-.02-.55-.07-.16-.69-1.66-.94-2.27-.25-.6-.5-.52-.69-.53-.18-.01-.39-.01-.6-.01s-.55.08-.83.39c-.28.31-1.08 1.06-1.08 2.57 0 1.51 1.1 2.97 1.25 3.17.16.2 2.16 3.3 5.24 4.63.73.32 1.3.51 1.75.65.73.23 1.4.2 1.93.12.59-.09 1.84-.75 2.1-1.48.26-.73.26-1.35.18-1.48-.08-.13-.28-.21-.59-.37z" fill="#fff"/>
+    </svg>
+  </span>
+  <span class="wa-label">Chat with Us on WhatsApp</span>
+</a>
+
+  <script src="js/main.js"></script>
+  <script>
+    // Lightbox
+    const items = document.querySelectorAll('.gallery-page-item');
+    const lightbox = document.getElementById('lightbox');
+    const lbMedia   = document.getElementById('lightboxMedia');
+    const lbCaption = document.getElementById('lightboxCaption');
+    let currentIndex = 0;
+    const visibleItems = () => [...items].filter(i => i.style.display !== 'none');
+
+    items.forEach((item) => {
+      item.addEventListener('click', () => {
+        const vis = visibleItems();
+        currentIndex = vis.indexOf(item);
+        openLightbox(vis[currentIndex]);
+      });
+    });
+
+    function openLightbox(item) {
+      const imgSrc = item.dataset.img;
+      if (imgSrc) {
+        /* Real photo */
+        lbMedia.innerHTML = `<img src="${imgSrc}" alt="${item.dataset.caption || ''}"
+          style="max-width:100%;max-height:70vh;border-radius:12px;object-fit:contain;display:block;margin:0 auto;box-shadow:0 8px 40px rgba(0,0,0,0.5);" />`;
+      } else {
+        /* Emoji placeholder */
+        const emoji = item.childNodes[0].textContent.trim();
+        lbMedia.innerHTML = `<span style="font-size:7rem;line-height:1;display:block;text-align:center;">${emoji}</span>`;
+      }
+      lbCaption.textContent = item.dataset.caption || '';
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    document.getElementById('lightboxClose').addEventListener('click', () => {
+      lightbox.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+
+    document.getElementById('lightboxPrev').addEventListener('click', () => {
+      const vis = visibleItems();
+      currentIndex = (currentIndex - 1 + vis.length) % vis.length;
+      openLightbox(vis[currentIndex]);
+    });
+
+    document.getElementById('lightboxNext').addEventListener('click', () => {
+      const vis = visibleItems();
+      currentIndex = (currentIndex + 1) % vis.length;
+      openLightbox(vis[currentIndex]);
+    });
+
+    lightbox.addEventListener('click', e => {
+      if (e.target === lightbox) { lightbox.classList.remove('open'); document.body.style.overflow = ''; }
+    });
+
+    document.addEventListener('keydown', e => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape') { lightbox.classList.remove('open'); document.body.style.overflow = ''; }
+      if (e.key === 'ArrowLeft') document.getElementById('lightboxPrev').click();
+      if (e.key === 'ArrowRight') document.getElementById('lightboxNext').click();
+    });
+  </script>
+</body>
+</html>
