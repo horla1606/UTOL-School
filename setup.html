@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UTOL Schools – One-Time Setup</title>
+  <link rel="stylesheet" href="../css/portal.css" />
+  <style>
+    body { background:#f0f4fa; display:flex; align-items:center; justify-content:center; min-height:100vh; }
+    .setup-box {
+      background:#fff; border-radius:16px; box-shadow:0 8px 32px rgba(13,37,96,0.12);
+      padding:40px; max-width:540px; width:100%;
+    }
+    .setup-box h1 { font-family:'Fredoka One',cursive; color:var(--navy); margin:0 0 4px; font-size:1.8rem; }
+    .setup-box p { color:var(--gray); font-size:0.88rem; margin-bottom:24px; }
+    .setup-warning {
+      background:#fffbeb; border:1px solid #fde68a; border-radius:8px;
+      padding:12px 14px; font-size:0.82rem; color:#92400e; margin-bottom:20px;
+    }
+    .setup-warning strong { display:block; margin-bottom:4px; }
+    .account-list { margin-bottom:20px; }
+    .account-row {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 14px; background:var(--light); border-radius:8px; margin-bottom:8px;
+      font-size:0.85rem;
+    }
+    .account-role { font-weight:700; color:var(--navy); text-transform:capitalize; }
+    .account-email { color:var(--gray); font-size:0.78rem; }
+    .account-status { font-size:0.78rem; font-weight:700; }
+    .status-pending { color:var(--gray); }
+    .status-ok { color:var(--green); }
+    .status-error { color:#dc2626; }
+    .status-exists { color:var(--yellow); }
+    .btn-setup {
+      width:100%; padding:14px; background:var(--navy); color:#fff; border:none;
+      border-radius:10px; font-family:'Fredoka One',cursive; font-size:1.1rem;
+      cursor:pointer; transition:background .2s;
+    }
+    .btn-setup:hover { background:#1a3a6b; }
+    .btn-setup:disabled { opacity:.6; cursor:not-allowed; }
+    .log-box {
+      margin-top:20px; background:#0f172a; border-radius:8px; padding:14px;
+      font-family:monospace; font-size:0.78rem; color:#94a3b8; min-height:80px;
+      white-space:pre-wrap; display:none;
+    }
+    .log-box.visible { display:block; }
+    .log-ok { color:#4ade80; }
+    .log-err { color:#f87171; }
+    .log-info { color:#60a5fa; }
+    .done-msg {
+      margin-top:16px; background:#f0fdf4; border:1px solid #86efac; border-radius:8px;
+      padding:14px; font-size:0.85rem; color:#15803d; display:none; text-align:center;
+    }
+    .done-msg.visible { display:block; }
+    .done-msg a { color:var(--navy); font-weight:700; }
+  </style>
+</head>
+<body>
+  <div class="setup-box">
+    <h1>&#9881;&#65039; UTOL Portal Setup</h1>
+    <p>This page creates the 4 demo portal accounts in your Supabase project. Run it <strong>once only</strong>.</p>
+
+    <div class="setup-warning">
+      <strong>&#9888;&#65039; Before you click "Create Accounts":</strong>
+      In your Supabase dashboard, go to <strong>Authentication → Settings</strong> and make sure
+      <strong>"Confirm email"</strong> is turned <strong>OFF</strong>. Otherwise accounts won't activate automatically.
+    </div>
+
+    <div class="account-list" id="accountList">
+      <div class="account-row" data-role="student">
+        <div>
+          <div class="account-role">&#127891; Student</div>
+          <div class="account-email">utol.student@utolschools.edu.gh</div>
+        </div>
+        <div class="account-status status-pending" id="status-student">Pending</div>
+      </div>
+      <div class="account-row" data-role="staff">
+        <div>
+          <div class="account-role">&#128104;&#8205;&#127979; Staff</div>
+          <div class="account-email">utol.staff@utolschools.edu.gh</div>
+        </div>
+        <div class="account-status status-pending" id="status-staff">Pending</div>
+      </div>
+      <div class="account-row" data-role="parent">
+        <div>
+          <div class="account-role">&#128101; Parent</div>
+          <div class="account-email">utol.parent@utolschools.edu.gh</div>
+        </div>
+        <div class="account-status status-pending" id="status-parent">Pending</div>
+      </div>
+      <div class="account-row" data-role="admin">
+        <div>
+          <div class="account-role">&#128737; Admin</div>
+          <div class="account-email">utol.admin@utolschools.edu.gh</div>
+        </div>
+        <div class="account-status status-pending" id="status-admin">Pending</div>
+      </div>
+    </div>
+
+    <button class="btn-setup" id="setupBtn" onclick="runSetup()">&#128640; Create Accounts &amp; Set Password: 123456</button>
+
+    <div class="log-box" id="logBox"></div>
+    <div class="done-msg" id="doneMsg">
+      &#10003; All accounts are ready!<br/>
+      <a href="login.html">&#8594; Go to Login Page</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script>
+    const DEFAULT_PASSWORD = '123456';
+    const logEl = document.getElementById('logBox');
+
+    function log(msg, type = 'info') {
+      logEl.classList.add('visible');
+      const cls = type === 'ok' ? 'log-ok' : type === 'err' ? 'log-err' : 'log-info';
+      logEl.innerHTML += `<span class="${cls}">${msg}\n</span>`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    async function runSetup() {
+      const btn = document.getElementById('setupBtn');
+      btn.disabled = true;
+      btn.textContent = 'Creating accounts…';
+      logEl.innerHTML = '';
+
+      log('Starting UTOL Schools portal account setup…');
+
+      const results = await UTOL.createDemoAccounts(DEFAULT_PASSWORD);
+      let allOk = true;
+
+      for (const r of results) {
+        const statusEl = document.getElementById(`status-${r.role}`);
+        if (r.success) {
+          statusEl.textContent = '✓ Created';
+          statusEl.className = 'account-status status-ok';
+          log(`✓ ${r.role} (${r.email}) — account created`, 'ok');
+        } else if (r.error && r.error.toLowerCase().includes('already registered')) {
+          statusEl.textContent = '⚠ Already exists';
+          statusEl.className = 'account-status status-exists';
+          log(`⚠ ${r.role} (${r.email}) — already exists (OK)`, 'info');
+        } else {
+          statusEl.textContent = '✗ Error';
+          statusEl.className = 'account-status status-error';
+          log(`✗ ${r.role} (${r.email}) — ${r.error}`, 'err');
+          allOk = false;
+        }
+      }
+
+      if (allOk) {
+        log('\nAll done! You can now log in at login.html', 'ok');
+        document.getElementById('doneMsg').classList.add('visible');
+        btn.textContent = '✓ Setup Complete';
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Retry Setup';
+        log('\nSome accounts failed. Make sure "Confirm email" is OFF in Supabase Auth settings, then retry.', 'err');
+      }
+    }
+  </script>
+</body>
+</html>
