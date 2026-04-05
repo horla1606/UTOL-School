@@ -1,0 +1,8 @@
+# Supabase setup files — already applied, no need in repo
+supabase-schema.sql
+portal/setup.html
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini

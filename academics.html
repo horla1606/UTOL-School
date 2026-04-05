@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Academics – UTOL Schools</title>
+  <meta name="description" content="Explore the UTOL Schools curriculum from Creche to Year 5 — subjects, class levels, teaching approach and more. Arepo, Ogun State." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+
+  <style>
+    /* ---- Active nav highlight ---- */
+    .nav-links a.active {
+      background: var(--yellow) !important;
+      color: var(--navy) !important;
+      border-radius: 8px;
+      font-weight: 800;
+    }
+
+    /* ================================================
+       PAGE HERO
+    ================================================ */
+    .academics-hero {
+      background: linear-gradient(135deg, var(--navy) 0%, #050870 55%, #0c0ca8 100%);
+      padding: 140px 0 80px;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+    .academics-hero::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -100px;
+      width: 480px; height: 480px;
+      background: radial-gradient(circle, rgba(244,199,10,0.10) 0%, transparent 65%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .academics-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; left: -60px;
+      width: 340px; height: 340px;
+      background: radial-gradient(circle, rgba(46,125,50,0.13) 0%, transparent 65%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .acad-hero-ring {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .ahr1 {
+      width: 280px; height: 280px;
+      border: 28px solid rgba(244,199,10,0.07);
+      top: -40px; right: 10%;
+    }
+    .ahr2 {
+      width: 140px; height: 140px;
+      border: 20px solid rgba(46,125,50,0.09);
+      bottom: 16px; left: 12%;
+    }
+
+    .academics-hero-inner {
+      position: relative;
+      z-index: 2;
+    }
+    .acad-breadcrumb {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 18px;
+    }
+    .acad-breadcrumb a { color: var(--yellow); }
+    .acad-breadcrumb a:hover { opacity: 0.8; }
+    .acad-breadcrumb .sep { color: rgba(255,255,255,0.28); }
+
+    .academics-hero h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2.6rem, 6vw, 4.2rem);
+      color: var(--white);
+      line-height: 1.05;
+      margin-bottom: 14px;
+    }
+    .academics-hero h1 span { color: var(--yellow); }
+
+    .academics-hero-sub {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.70);
+      max-width: 520px;
+      margin: 0 auto 32px;
+      line-height: 1.7;
+    }
+
+    .acad-hero-chips {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .acad-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: rgba(255,255,255,0.82);
+      padding: 7px 16px;
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      backdrop-filter: blur(6px);
+    }
+
+    /* ================================================
+       INTRO SECTION
+    ================================================ */
+    .acad-intro { padding: 88px 0; background: var(--white); }
+
+    .acad-intro-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      margin-top: 0;
+    }
+
+    .acad-intro-text {}
+    .acad-intro-text .section-tag { margin-bottom: 12px; }
+
+    .acad-intro-text h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.9rem, 3.5vw, 2.6rem);
+      color: var(--navy);
+      margin-bottom: 20px;
+      line-height: 1.15;
+    }
+    .acad-intro-text p {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.96rem;
+      color: var(--gray);
+      line-height: 1.85;
+      margin-bottom: 16px;
+    }
+    .acad-intro-text p:last-of-type { margin-bottom: 28px; }
+
+    /* Right: stat panel */
+    .acad-stat-panel {
+      background: linear-gradient(145deg, var(--navy) 0%, #1a1aad 100%);
+      border-radius: 24px;
+      padding: 36px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .acad-stat-panel::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(244,199,10,0.12) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .acad-stat-panel::after {
+      content: '';
+      position: absolute;
+      bottom: -30px; left: -30px;
+      width: 140px; height: 140px;
+      background: radial-gradient(circle, rgba(46,125,50,0.14) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .acad-panel-label {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1rem;
+      color: var(--yellow);
+      margin-bottom: 22px;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+    .acad-panel-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      position: relative;
+      z-index: 1;
+    }
+    .acad-panel-stat {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 18px 16px;
+    }
+    .acad-panel-stat strong {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2rem;
+      color: var(--yellow);
+      display: block;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .acad-panel-stat span {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.62);
+    }
+    .acad-panel-note {
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: rgba(244,199,10,0.12);
+      border: 1px solid rgba(244,199,10,0.22);
+      border-radius: 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.5;
+      position: relative;
+      z-index: 1;
+    }
+    .acad-panel-note strong { color: var(--yellow); }
+
+    /* ================================================
+       CLASS LEVELS
+    ================================================ */
+    .class-levels-section { padding: 88px 0; background: var(--light); }
+
+    .cl-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px;
+      margin-top: 48px;
+    }
+
+    .cl-card {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 28px 22px 24px;
+      box-shadow: 0 4px 20px rgba(3,4,94,0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .cl-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(3,4,94,0.14);
+    }
+    .cl-card:hover .cl-arrow { opacity: 1; transform: translateX(0); }
+
+    /* Colour band across the top */
+    .cl-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      border-radius: 20px 20px 0 0;
+    }
+
+    /* Avatar circle */
+    .cl-avatar {
+      width: 62px; height: 62px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.25rem;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    /* Subtle ring around avatar */
+    .cl-avatar::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2.5px solid currentColor;
+      opacity: 0.2;
+    }
+
+    /* Per-level colours */
+    .cl-creche  { --cl-c: #ef4444; }
+    .cl-creche::before  { background: #ef4444; }
+    .cl-creche  .cl-avatar { background: rgba(239,68,68,0.12); color: #ef4444; }
+
+    .cl-prep    { --cl-c: #f59e0b; }
+    .cl-prep::before    { background: #f59e0b; }
+    .cl-prep    .cl-avatar { background: rgba(245,158,11,0.12); color: #f59e0b; }
+
+    .cl-kg      { --cl-c: #10b981; }
+    .cl-kg::before      { background: #10b981; }
+    .cl-kg      .cl-avatar { background: rgba(16,185,129,0.12); color: #10b981; }
+
+    .cl-y1      { --cl-c: #3b82f6; }
+    .cl-y1::before      { background: #3b82f6; }
+    .cl-y1      .cl-avatar { background: rgba(59,130,246,0.12); color: #3b82f6; }
+
+    .cl-y2      { --cl-c: #a855f7; }
+    .cl-y2::before      { background: #a855f7; }
+    .cl-y2      .cl-avatar { background: rgba(168,85,247,0.12); color: #a855f7; }
+
+    .cl-y3      { --cl-c: #ec4899; }
+    .cl-y3::before      { background: #ec4899; }
+    .cl-y3      .cl-avatar { background: rgba(236,72,153,0.12); color: #ec4899; }
+
+    .cl-y4      { --cl-c: #14b8a6; }
+    .cl-y4::before      { background: #14b8a6; }
+    .cl-y4      .cl-avatar { background: rgba(20,184,166,0.12); color: #14b8a6; }
+
+    .cl-y5      { --cl-c: var(--navy); }
+    .cl-y5::before      { background: var(--navy); }
+    .cl-y5      .cl-avatar { background: rgba(3,4,94,0.09); color: var(--navy); }
+
+    .cl-card h3 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.15rem;
+      color: var(--navy);
+      margin-bottom: 2px;
+    }
+    .cl-age {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .cl-card p {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.83rem;
+      color: var(--gray);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .cl-arrow {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--navy);
+      opacity: 0;
+      transform: translateX(-8px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ================================================
+       SUBJECTS OFFERED
+    ================================================ */
+    .subjects-section { padding: 88px 0; background: var(--white); }
+
+    .subjects-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-top: 48px;
+    }
+
+    .subject-card {
+      background: var(--white);
+      border: 1.5px solid #e8ecff;
+      border-radius: 16px;
+      padding: 24px 18px;
+      text-align: center;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .subject-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--yellow);
+      transform: scaleX(0);
+      transform-origin: center;
+      transition: transform 0.3s ease;
+      border-radius: 0 0 16px 16px;
+    }
+    .subject-card:hover {
+      border-color: var(--navy);
+      box-shadow: 0 8px 28px rgba(3,4,94,0.10);
+      transform: translateY(-4px);
+    }
+    .subject-card:hover::after { transform: scaleX(1); }
+
+    .subj-icon-wrap {
+      width: 54px; height: 54px;
+      background: var(--light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      margin: 0 auto 14px;
+      transition: background 0.3s ease;
+    }
+    .subject-card:hover .subj-icon-wrap { background: rgba(3,4,94,0.07); }
+
+    .subject-card h4 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1rem;
+      color: var(--navy);
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    /* ================================================
+       TEACHING APPROACH
+    ================================================ */
+    .approach-section { padding: 88px 0; background: var(--light); }
+
+    .approach-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 48px;
+    }
+
+    .approach-card {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 36px 28px;
+      box-shadow: 0 4px 20px rgba(3,4,94,0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .approach-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 5px;
+      border-radius: 20px 20px 0 0;
+    }
+    .approach-card:nth-child(1)::before { background: var(--navy); }
+    .approach-card:nth-child(2)::before { background: var(--yellow); }
+    .approach-card:nth-child(3)::before { background: var(--green); }
+
+    .approach-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(3,4,94,0.13);
+    }
+
+    /* Watermark number */
+    .approach-card .ap-num {
+      position: absolute;
+      bottom: -12px; right: 14px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 6rem;
+      line-height: 1;
+      color: var(--navy);
+      opacity: 0.04;
+      pointer-events: none;
+    }
+
+    .ap-icon-wrap {
+      width: 64px; height: 64px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 22px;
+    }
+    .approach-card:nth-child(1) .ap-icon-wrap { background: rgba(3,4,94,0.07); }
+    .approach-card:nth-child(2) .ap-icon-wrap { background: rgba(244,199,10,0.16); }
+    .approach-card:nth-child(3) .ap-icon-wrap { background: rgba(46,125,50,0.10); }
+
+    .approach-card h3 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.25rem;
+      color: var(--navy);
+      margin-bottom: 12px;
+    }
+    .approach-card p {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.88rem;
+      color: var(--gray);
+      line-height: 1.78;
+      margin: 0;
+    }
+
+    /* Highlight pull-quote within approach card */
+    .ap-quote {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: var(--light);
+      border-left: 4px solid var(--yellow);
+      border-radius: 0 8px 8px 0;
+      padding: 10px 14px;
+      margin-top: 16px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--navy);
+      font-style: italic;
+    }
+
+    /* ================================================
+       CTA STRIP
+    ================================================ */
+    .acad-cta {
+      background: var(--yellow);
+      padding: 64px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .acad-cta::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        -45deg, transparent, transparent 20px,
+        rgba(3,4,94,0.025) 20px, rgba(3,4,94,0.025) 40px
+      );
+    }
+    .acad-cta-circle {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--navy);
+      opacity: 0.07;
+      pointer-events: none;
+    }
+    .acc1 { width: 320px; height: 320px; top: -120px; right: 4%; }
+    .acc2 { width: 200px; height: 200px; bottom: -70px; left: 6%; }
+
+    .acad-cta-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 10px;
+    }
+    .acad-cta-inner .cta-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(3,4,94,0.10);
+      color: var(--navy);
+      padding: 5px 16px;
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+    }
+    .acad-cta-inner h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.9rem, 4vw, 2.8rem);
+      color: var(--navy);
+      line-height: 1.15;
+      max-width: 640px;
+      margin: 0 auto 10px;
+    }
+    .acad-cta-inner p {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      color: rgba(3,4,94,0.70);
+      max-width: 520px;
+      margin: 0 auto 28px;
+      line-height: 1.7;
+    }
+    .acad-cta-btns {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* ================================================
+       RESPONSIVE
+    ================================================ */
+    @media (max-width: 1024px) {
+      .acad-intro-grid { grid-template-columns: 1fr; gap: 44px; }
+      .acad-stat-panel { max-width: 500px; margin: 0 auto; }
+      .cl-grid         { grid-template-columns: repeat(2, 1fr); }
+      .subjects-grid   { grid-template-columns: repeat(3, 1fr); }
+      .approach-grid   { grid-template-columns: 1fr; max-width: 560px; margin-left: auto; margin-right: auto; }
+    }
+    @media (max-width: 768px) {
+      .academics-hero  { padding: 120px 0 64px; }
+      .academics-hero h1 { font-size: 2.4rem; }
+      .cl-grid         { grid-template-columns: repeat(2, 1fr); }
+      .subjects-grid   { grid-template-columns: repeat(2, 1fr); }
+      .acad-cta-btns   { flex-direction: column; align-items: center; }
+    }
+    @media (max-width: 480px) {
+      .cl-grid         { grid-template-columns: 1fr; }
+      .subjects-grid   { grid-template-columns: repeat(2, 1fr); }
+      .acad-hero-chips { gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     ANNOUNCEMENT BAR
+============================================================ -->
+<div class="announcement-bar" role="marquee" aria-label="School announcements">
+  <div class="announcement-track">
+    <div class="announcement-item"><span class="ann-dot"></span>&#127881; Enrolment is NOW OPEN for the 2025/2026 Academic Year &mdash; <a href="admissions.html">Apply Today</a></div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#128197; Term 3 resumes Monday, 9th September 2025 &mdash; Welcome back, UTOL family!</div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#127942; UTOL wins Best Primary School Award 2024 &mdash; Congratulations to our students &amp; staff!</div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#128222; Admissions Enquiries: <a href="tel:08059714287">0805 971 4287</a></div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#128336; School Hours: Mon&ndash;Thu 7:30am&ndash;3:00pm &nbsp;|&nbsp; Fri 7:30am&ndash;1:00pm</div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#127968; Visit us at 7/9 Jemimat Laalu Street, Arepo, Ogun State</div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#127881; Enrolment is NOW OPEN for the 2025/2026 Academic Year &mdash; <a href="admissions.html">Apply Today</a></div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#128197; Term 3 resumes Monday, 9th September 2025 &mdash; Welcome back, UTOL family!</div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#127942; UTOL wins Best Primary School Award 2024 &mdash; Congratulations to our students &amp; staff!</div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#128222; Admissions Enquiries: <a href="tel:08059714287">0805 971 4287</a></div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#128336; School Hours: Mon&ndash;Thu 7:30am&ndash;3:00pm &nbsp;|&nbsp; Fri 7:30am&ndash;1:00pm</div>
+    <div class="announcement-item"><span class="ann-dot"></span>&#127968; Visit us at 7/9 Jemimat Laalu Street, Arepo, Ogun State</div>
+  </div>
+</div>
+
+<!-- ============================================================
+     STICKY NAVBAR
+============================================================ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo" aria-label="UTOL Schools home">
+      <div class="nav-logo-icon"><img src="images/logo.jpeg" alt="UTOL Schools Logo" /></div>
+      <div class="nav-logo-text">
+        <strong>UTOL Schools</strong>
+        <span>Where Greatness Begins</span>
+      </div>
+    </a>
+
+    <ul class="nav-links" id="navLinks" role="menubar">
+      <li role="none"><a href="index.html"               role="menuitem">Home</a></li>
+      <li role="none"><a href="about.html"               role="menuitem">About</a></li>
+      <li role="none"><a href="academics.html" class="active" role="menuitem">Academics</a></li>
+      <li role="none"><a href="admissions.html"          role="menuitem">Admissions</a></li>
+      <li role="none"><a href="news.html"                role="menuitem">News &amp; Events</a></li>
+      <li role="none"><a href="gallery.html"             role="menuitem">Gallery</a></li>
+      <li role="none"><a href="faq.html"                 role="menuitem">FAQ</a></li>
+      <li role="none"><a href="contact.html"             role="menuitem">Contact</a></li>
+      <li role="none"><a href="portal/login.html" class="nav-portal-btn" role="menuitem">Portal Login</a></li>
+    </ul>
+
+    <button class="nav-hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ============================================================
+     1. PAGE HERO
+============================================================ -->
+<section class="academics-hero">
+  <div class="acad-hero-ring ahr1" aria-hidden="true"></div>
+  <div class="acad-hero-ring ahr2" aria-hidden="true"></div>
+
+  <div class="container">
+    <div class="academics-hero-inner">
+
+      <div class="acad-breadcrumb">
+        <a href="index.html">Home</a>
+        <span class="sep">/</span>
+        <span>Academics</span>
+      </div>
+
+      <h1><span>Academics</span> at UTOL</h1>
+      <p class="academics-hero-sub">A strong foundation for every stage of learning &mdash; from your child's very first days at school to their confident transition into secondary education.</p>
+
+      <div class="acad-hero-chips">
+        <span class="acad-chip">&#127891; Creche &ndash; Year 5</span>
+        <span class="acad-chip">&#128218; 12 Subjects Offered</span>
+        <span class="acad-chip">&#128200; Continuous Assessment</span>
+        <span class="acad-chip">&#127760; Modern Curriculum</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     2. INTRODUCTION
+============================================================ -->
+<section class="acad-intro" id="intro">
+  <div class="container">
+    <div class="acad-intro-grid">
+
+      <!-- Text left -->
+      <div class="acad-intro-text">
+        <span class="section-tag">Our Curriculum</span>
+        <h2>Learning That Grows With Your Child</h2>
+
+        <p>
+          At UTOL Schools, we believe that a truly great education is about so much more than passing tests. From the moment a child joins our Creche to the day they graduate from Year 5, we offer a rich, balanced and joyful curriculum that develops the whole child &mdash; academically, creatively, socially and emotionally. Every lesson, every activity and every interaction is carefully designed to spark curiosity, build confidence and lay a rock-solid foundation for future learning.
+        </p>
+        <p>
+          Our curriculum blends the very best of the Nigerian National Primary School Curriculum with forward-thinking approaches drawn from leading international school systems. We combine strong core academics &mdash; English, Mathematics and Science &mdash; with creative subjects, physical education and character-building activities, so that every child who leaves UTOL is not just academically ready for the next stage, but truly ready for life.
+        </p>
+
+        <a href="admissions.html" class="btn btn-navy">Enrol Your Child &rarr;</a>
+      </div>
+
+      <!-- Stat panel right -->
+      <div class="acad-stat-panel" style="position:relative;overflow:hidden;">
+        <!-- Classroom photo as background -->
+        <img src="images/gallery1.jpeg" alt="UTOL Schools nursery classroom"
+          style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.18;border-radius:inherit;" />
+        <p class="acad-panel-label" style="position:relative;z-index:1;">&#127891; Our Academic Snapshot</p>
+        <div class="acad-panel-grid" style="position:relative;z-index:1;">
+          <div class="acad-panel-stat">
+            <strong>8</strong>
+            <span>Class Levels</span>
+          </div>
+          <div class="acad-panel-stat">
+            <strong>12</strong>
+            <span>Subjects Offered</span>
+          </div>
+          <div class="acad-panel-stat">
+            <strong>3</strong>
+            <span>Terms per Year</span>
+          </div>
+          <div class="acad-panel-stat">
+            <strong>98%</strong>
+            <span>Transition Rate</span>
+          </div>
+        </div>
+        <div class="acad-panel-note" style="position:relative;z-index:1;">
+          &#128276; <strong>Year 5 pupils</strong> achieve a 98% success rate gaining entry to their first-choice secondary schools — year after year.
+        </div>
+        <!-- Classroom photo showcase strip -->
+        <div style="position:relative;z-index:1;margin-top:16px;border-radius:10px;overflow:hidden;height:140px;">
+          <img src="images/gallery1.jpeg" alt="Children learning in the UTOL Nursery classroom"
+            style="width:100%;height:100%;object-fit:cover;display:block;" />
+          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(13,37,96,0.85));padding:12px 14px 10px;color:#fff;font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:700;">
+            &#127979; Inside Our Early Years Classroom
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     3. CLASS LEVELS
+============================================================ -->
+<section class="class-levels-section" id="class-levels">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-tag">Class Levels</span>
+      <h2 class="section-title">From Creche to Year 5</h2>
+      <p class="section-subtitle">Eight carefully structured learning stages, each designed to meet children exactly where they are and take them further than they imagined.</p>
+    </div>
+
+    <div class="cl-grid">
+
+      <!-- Creche -->
+      <div class="cl-card cl-creche" id="creche">
+        <div class="cl-avatar">CR</div>
+        <h3>Creche</h3>
+        <span class="cl-age">Ages 0 &ndash; 2 years</span>
+        <p>Our caring Creche provides a warm, safe haven where babies and toddlers explore the world through play, sensory activities and loving interactions with our trained staff.</p>
+        <span class="cl-arrow">Learn more &rarr;</span>
+      </div>
+
+      <!-- Prep -->
+      <div class="cl-card cl-prep" id="prep">
+        <div class="cl-avatar">PP</div>
+        <h3>Preparatory</h3>
+        <span class="cl-age">Ages 2 &ndash; 3 years</span>
+        <p>In our Prep class, toddlers begin to develop early social skills, simple routines and basic learning habits through guided play, music, stories and gentle exploration.</p>
+        <span class="cl-arrow">Learn more &rarr;</span>
+      </div>
+
+      <!-- KG -->
+      <div class="cl-card cl-kg" id="kg">
+        <div class="cl-avatar">KG</div>
+        <h3>Kindergarten</h3>
+        <span class="cl-age">Ages 3 &ndash; 5 years</span>
+        <p>KG children are introduced to phonics, early numbers and foundational literacy skills in a vibrant, activity-rich environment that makes learning feel like the greatest adventure.</p>
+        <span class="cl-arrow">Learn more &rarr;</span>
+      </div>
+
+      <!-- Year 1 -->
+      <div class="cl-card cl-y1" id="y1">
+        <div class="cl-avatar">Y1</div>
+        <h3>Year 1</h3>
+        <span class="cl-age">Ages 5 &ndash; 6 years</span>
+        <p>Year 1 pupils build the essential foundations of reading, writing and numeracy — discovering the power of words and numbers while developing the confidence to express themselves.</p>
+        <span class="cl-arrow">Learn more &rarr;</span>
+      </div>
+
+      <!-- Year 2 -->
+      <div class="cl-card cl-y2" id="y2">
+        <div class="cl-avatar">Y2</div>
+        <h3>Year 2</h3>
+        <span class="cl-age">Ages 6 &ndash; 7 years</span>
+        <p>Building on strong Year 1 foundations, pupils expand their literacy skills, deepen their mathematical understanding and get their first exciting taste of science and the natural world.</p>
+        <span class="cl-arrow">Learn more &rarr;</span>
+      </div>
+
+      <!-- Year 3 -->
+      <div class="cl-card cl-y3" id="y3">
+        <div class="cl-avatar">Y3</div>
+        <h3>Year 3</h3>
+        <span class="cl-age">Ages 7 &ndash; 8 years</span>
+        <p>Year 3 pupils grow in confidence across all core subjects. Lessons become richer and more structured as children learn to take on new challenges with curiosity and resilience.</p>
+        <span class="cl-arrow">Learn more &rarr;</span>
+      </div>
+
+      <!-- Year 4 -->
+      <div class="cl-card cl-y4" id="y4">
+        <div class="cl-avatar">Y4</div>
+        <h3>Year 4</h3>
+        <span class="cl-age">Ages 8 &ndash; 9 years</span>
+        <p>Critical thinking and independent project work take centre stage in Year 4 as pupils learn to research, analyse and present ideas with growing maturity and academic rigour.</p>
+        <span class="cl-arrow">Learn more &rarr;</span>
+      </div>
+
+      <!-- Year 5 -->
+      <div class="cl-card cl-y5" id="y5">
+        <div class="cl-avatar">Y5</div>
+        <h3>Year 5</h3>
+        <span class="cl-age">Ages 9 &ndash; 11 years</span>
+        <p>Our Year 5 programme prepares every pupil thoroughly for secondary school transition &mdash; covering Common Entrance topics, study skills and the confidence to thrive in the next chapter.</p>
+        <span class="cl-arrow">Learn more &rarr;</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     4. SUBJECTS OFFERED
+============================================================ -->
+<section class="subjects-section" id="subjects">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-tag">Subjects</span>
+      <h2 class="section-title">What We Teach</h2>
+      <p class="section-subtitle">A broad and balanced timetable ensures every child develops across all areas &mdash; from core academics to creative arts, technology and physical wellbeing.</p>
+    </div>
+
+    <div class="subjects-grid">
+
+      <div class="subject-card">
+        <div class="subj-icon-wrap">&#128218;</div>
+        <h4>English Language</h4>
+      </div>
+
+      <div class="subject-card">
+        <div class="subj-icon-wrap">&#10135;&#65039;</div>
+        <h4>Mathematics</h4>
+      </div>
+
+      <div class="subject-card">
+        <div class="subj-icon-wrap">&#129514;</div>
+        <h4>Basic Science</h4>
+      </div>
+
+      <div class="subject-card">
+        <div class="subj-icon-wrap">&#127758;</div>
+        <h4>Social Studies</h4>
+      </div>
+
+      <div class="subject-card">
+        <div class="subj-icon-wrap">&#9878;&#65039;</div>
+        <h4>Civic Education</h4>
+      </div>
+
+      <div class="subject-card">
+        <div class="subj-icon-wrap">&#128187;</div>
+        <h4>Computer Studies</h4>
+      </div>
+
+      <div class="subject-card">
+        <div class="subj-icon-wrap">&#127912;</div>
+        <h4>Creative Arts</h4>
+      </div>
+
+      <div class="subject-card">
+        <div class="subj-icon-wrap">&#9917;</div>
+        <h4>Physical Education</h4>
+      </div>
+
+      <div class="subject-card">
+        <div class="subj-icon-wrap">&#127929;</div>
+        <h4>Music</h4>
+      </div>
+
+      <div class="subject-card">
+        <div class="subj-icon-wrap">&#128483;&#65039;</div>
+        <h4>Yoruba Language</h4>
+      </div>
+
+      <div class="subject-card">
+        <div class="subj-icon-wrap">&#9749;</div>
+        <h4>Religious Studies</h4>
+      </div>
+
+      <div class="subject-card">
+        <div class="subj-icon-wrap">&#127829;</div>
+        <h4>Home Economics</h4>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     5. TEACHING APPROACH
+============================================================ -->
+<section class="approach-section" id="approach">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-tag">How We Teach</span>
+      <h2 class="section-title">Our Teaching Philosophy</h2>
+      <p class="section-subtitle">Three principles guide every lesson at UTOL Schools &mdash; ensuring every child is engaged, supported and celebrated throughout their learning journey.</p>
+    </div>
+
+    <div class="approach-grid">
+
+      <!-- Card 1: Child-Centred -->
+      <div class="approach-card">
+        <span class="ap-num" aria-hidden="true">1</span>
+        <div class="ap-icon-wrap">&#129504;</div>
+        <h3>Child-Centred Learning</h3>
+        <p>
+          We understand that every child is beautifully unique. Our teachers take the time to truly know each pupil &mdash; their strengths, their interests, the way they learn best &mdash; and design lessons that meet them exactly where they are. There is no one-size-fits-all approach at UTOL; every child receives learning that is personal, purposeful and paced just right for them.
+        </p>
+        <div class="ap-quote">&#10024; Every child is seen, known and valued in our classrooms.</div>
+      </div>
+
+      <!-- Card 2: Hands-On -->
+      <div class="approach-card">
+        <span class="ap-num" aria-hidden="true">2</span>
+        <div class="ap-icon-wrap">&#128295;</div>
+        <h3>Hands-On Activities</h3>
+        <p>
+          We firmly believe that children learn best when they are actively doing, exploring and experimenting &mdash; not just listening or copying from a board. From science experiments and building projects to drama, art and outdoor learning, our lessons are designed to make concepts come alive through experience. When children are engaged with their hands, their minds follow.
+        </p>
+        <div class="ap-quote">&#127919; Learning happens best when children are having fun doing it.</div>
+      </div>
+
+      <!-- Card 3: Continuous Assessment -->
+      <div class="approach-card">
+        <span class="ap-num" aria-hidden="true">3</span>
+        <div class="ap-icon-wrap">&#128200;</div>
+        <h3>Continuous Assessment</h3>
+        <p>
+          We never wait until the end of term to find out how a child is doing. Our teachers use continuous, formative assessment throughout every week &mdash; tracking progress, identifying gaps and celebrating growth as it happens. Parents are kept fully informed through regular updates and our online portal, so there are never any surprises and every child always gets the support they need, when they need it.
+        </p>
+        <div class="ap-quote">&#128203; Progress is tracked daily, not just at exam time.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     6. CTA STRIP
+============================================================ -->
+<section class="acad-cta">
+  <div class="acad-cta-circle acc1" aria-hidden="true"></div>
+  <div class="acad-cta-circle acc2" aria-hidden="true"></div>
+
+  <div class="container">
+    <div class="acad-cta-inner">
+      <span class="cta-tag">&#127891; Spaces Available Now</span>
+      <h2>Give Your Child a World-Class Foundation</h2>
+      <p>Every great story starts somewhere &mdash; and for hundreds of children across Arepo and Ogun State, it starts at UTOL Schools. Enrolment for 2025/2026 is open. Let&rsquo;s begin your child&rsquo;s journey together.</p>
+      <div class="acad-cta-btns">
+        <a href="admissions.html" class="btn btn-navy btn-strip-primary">Enquire Now &rarr;</a>
+        <a href="contact.html"   class="btn btn-strip-outline">Book a School Tour</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+============================================================ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo" style="margin-bottom:0;">
+          <div class="nav-logo-icon"><img src="images/logo.jpeg" alt="UTOL Schools Logo" /></div>
+          <div class="nav-logo-text">
+            <strong style="color:#fff;">UTOL Schools</strong>
+            <span>Where Greatness Begins</span>
+          </div>
+        </a>
+        <p>Nurturing curious, confident and compassionate learners from Creche to Year 5 in Arepo, Ogun State since 2006.</p>
+        <div class="footer-socials">
+          <a href="https://facebook.com/Utolschools" target="_blank" rel="noopener" class="social-btn" aria-label="Facebook">&#128241;</a>
+          <a href="https://wa.me/2348059714287?text=Hello%2C%20I%20have%20a%20question%20about%20admission%20at%20UTOL%20Schools." target="_blank" rel="noopener" class="social-btn" aria-label="WhatsApp">&#128172;</a>
+          <a href="#" class="social-btn" aria-label="Instagram">&#128247;</a>
+          <a href="#" class="social-btn" aria-label="YouTube">&#127909;</a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul class="footer-links">
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="academics.html">Academics</a></li>
+          <li><a href="admissions.html">Admissions</a></li>
+          <li><a href="news.html">News &amp; Events</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Portal Access</h4>
+        <ul class="footer-links">
+          <li><a href="portal/login.html?role=parent">Parent Portal</a></li>
+          <li><a href="portal/login.html?role=student">Student Portal</a></li>
+          <li><a href="portal/login.html?role=staff">Staff Portal</a></li>
+          <li><a href="portal/login.html?role=admin">Admin Portal</a></li>
+        </ul>
+        <h4 style="margin-top:20px;">Class Levels</h4>
+        <ul class="footer-links">
+          <li><a href="academics.html#creche">Creche</a></li>
+          <li><a href="academics.html#prep">Preparatory</a></li>
+          <li><a href="academics.html#kg">Kindergarten</a></li>
+          <li><a href="academics.html#y1">Year 1 &ndash; Year 5</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Contact Us</h4>
+        <ul class="footer-contact">
+          <li>
+            <span class="ci">&#128205;</span>
+            7/9 Jemimat Laalu Street, Off Journalist Phase Estate Road, Off Lagos-Ibadan Expy, Arepo, Ogun State
+          </li>
+          <li><span class="ci">&#128222;</span><a href="tel:08059714287" style="color:inherit;">0805 971 4287</a></li>
+          <li><span class="ci">&#128140;</span><a href="mailto:info@utolschools.edu.ng" style="color:inherit;">info@utolschools.edu.ng</a></li>
+          <li><span class="ci">&#128241;</span><a href="https://facebook.com/Utolschools" target="_blank" rel="noopener" style="color:inherit;">facebook.com/Utolschools</a></li>
+          <li><span class="ci">&#128336;</span>Mon&ndash;Thu: 7:30am&ndash;3:00pm<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fri: 7:30am&ndash;1:00pm</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <span>&copy; 2025 UTOL Schools. All rights reserved.</span>
+      <span>Designed with &#10084;&#65039; for the children of Arepo and beyond</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================================
+     FLOATING WHATSAPP BUTTON
+============================================================ -->
+<a
+  href="https://wa.me/2348059714287?text=Hello%2C%20I%20have%20a%20question%20about%20admission%20at%20UTOL%20Schools."
+  class="whatsapp-fab"
+  target="_blank"
+  rel="noopener"
+  aria-label="Chat with UTOL Schools on WhatsApp"
+  title="Chat with us on WhatsApp"
+>
+  <span class="wa-icon">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M14 0C6.268 0 0 6.268 0 14c0 2.467.638 4.784 1.755 6.793L0 28l7.415-1.727A13.94 13.94 0 0014 28c7.732 0 14-6.268 14-14S21.732 0 14 0z" fill="#fff" fill-opacity=".15"/>
+      <path d="M20.52 17.48c-.31-.16-1.84-.91-2.12-1.01-.28-.1-.49-.16-.69.16-.2.31-.77.99-.95 1.19-.17.2-.35.22-.66.06-.31-.16-1.31-.48-2.49-1.54-.92-.82-1.54-1.84-1.72-2.15-.18-.31-.02-.48.13-.64.14-.14.31-.36.47-.54.16-.18.21-.31.32-.52.1-.2.05-.39-.02-.55-.07-.16-.69-1.66-.94-2.27-.25-.6-.5-.52-.69-.53-.18-.01-.39-.01-.6-.01s-.55.08-.83.39c-.28.31-1.08 1.06-1.08 2.57 0 1.51 1.1 2.97 1.25 3.17.16.2 2.16 3.3 5.24 4.63.73.32 1.3.51 1.75.65.73.23 1.4.2 1.93.12.59-.09 1.84-.75 2.1-1.48.26-.73.26-1.35.18-1.48-.08-.13-.28-.21-.59-.37z" fill="#fff"/>
+    </svg>
+  </span>
+  <span class="wa-label">Chat with Us on WhatsApp</span>
+</a>
+
+<!-- ============================================================
+     SCRIPTS
+============================================================ -->
+<script src="js/main.js"></script>
+
+</body>
+</html>
