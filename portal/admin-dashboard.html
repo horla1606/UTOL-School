@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard – UTOL Schools Portal</title>
+  <link rel="stylesheet" href="../css/portal.css" />
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    /* ── Admin-specific extras ── */
+    .welcome-meta { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    .welcome-pill {
+      display:inline-flex; align-items:center; gap:5px;
+      background:rgba(255,255,255,0.25); color:#fff;
+      padding:4px 12px; border-radius:20px; font-size:0.78rem; font-weight:700;
+    }
+    .term-progress-wrap { margin-top:14px; }
+    .term-progress-wrap label { font-size:0.78rem; color:rgba(255,255,255,0.85); font-weight:700; }
+    .term-bar-bg { background:rgba(255,255,255,0.25); border-radius:8px; height:8px; margin-top:4px; }
+    .term-bar-fill { background:#fff; height:8px; border-radius:8px; transition:width 1s ease; }
+    .term-pct { font-size:0.75rem; color:rgba(255,255,255,0.8); margin-top:3px; }
+
+    /* stats grid — 3 columns on wider screens */
+    .stats-grid-6 {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:16px; margin-bottom:24px;
+    }
+
+    /* attendance donut */
+    .att-donut-wrap { display:flex; align-items:center; gap:24px; flex-wrap:wrap; }
+    .att-donut {
+      width:120px; height:120px; border-radius:50%; flex-shrink:0;
+      background: conic-gradient(var(--green) 0% 92%, #fca5a5 92% 96%, var(--yellow) 96% 100%);
+      display:flex; align-items:center; justify-content:center;
+      box-shadow: 0 0 0 14px var(--light);
+    }
+    .att-donut-inner {
+      width:80px; height:80px; border-radius:50%; background:#fff;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+    }
+    .att-donut-pct { font-family:'Fredoka One',cursive; font-size:1.5rem; color:var(--navy); line-height:1; }
+    .att-donut-sub { font-size:0.6rem; color:var(--gray); }
+    .att-legend { flex:1; min-width:160px; }
+    .att-legend-item { display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:0.82rem; }
+    .att-legend-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+    .att-legend-item strong { margin-left:auto; }
+    .att-division-list { margin-top:16px; }
+    .att-div-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:0.8rem; }
+    .att-div-label { min-width:90px; color:var(--dark); }
+    .att-div-bar-bg { flex:1; background:var(--light); border-radius:6px; height:8px; }
+    .att-div-bar { height:8px; border-radius:6px; background:var(--green); }
+    .att-div-pct { min-width:36px; text-align:right; font-weight:700; color:var(--navy); }
+
+    /* compose announcement */
+    .compose-box { background:var(--light); border-radius:10px; padding:14px; }
+    .compose-box textarea {
+      width:100%; border:1.5px solid #dce3ef; border-radius:8px; padding:10px;
+      font-family:'Nunito',sans-serif; font-size:0.88rem; resize:vertical; min-height:80px;
+      box-sizing:border-box; outline:none; transition:border-color .2s;
+    }
+    .compose-box textarea:focus { border-color:var(--navy); }
+    .compose-meta { display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; align-items:center; }
+    .compose-meta select {
+      border:1.5px solid #dce3ef; border-radius:6px; padding:6px 10px;
+      font-family:'Nunito',sans-serif; font-size:0.82rem; outline:none;
+    }
+    .compose-send-btn {
+      margin-left:auto; background:var(--navy); color:#fff; border:none;
+      border-radius:8px; padding:7px 18px; font-family:'Fredoka One',cursive;
+      font-size:0.9rem; cursor:pointer; transition:background .2s;
+    }
+    .compose-send-btn:hover { background:#1a3a6b; }
+
+    /* application status badge extras */
+    .badge-purple { background:#f3e8ff; color:#7c3aed; }
+    .badge-orange { background:#fff3e0; color:#e65100; }
+
+    /* staff leave mini-list */
+    .leave-item { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #f0f0f0; }
+    .leave-item:last-child { border-bottom:none; }
+    .leave-avatar { width:38px; height:38px; border-radius:50%; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.8rem; flex-shrink:0; }
+    .leave-info { flex:1; }
+    .leave-info strong { font-size:0.88rem; display:block; }
+    .leave-info span { font-size:0.75rem; color:var(--gray); }
+    .leave-actions { display:flex; gap:6px; }
+    .leave-approve { background:var(--green); color:#fff; border:none; border-radius:6px; padding:4px 10px; font-size:0.75rem; font-weight:700; cursor:pointer; }
+    .leave-decline { background:#fef2f2; color:#dc2626; border:1px solid #fca5a5; border-radius:6px; padding:4px 10px; font-size:0.75rem; font-weight:700; cursor:pointer; }
+
+    /* fee big number */
+    .fee-big { font-family:'Fredoka One',cursive; font-size:2.8rem; color:var(--navy); line-height:1; }
+    .fee-sub { font-size:0.8rem; color:var(--gray); margin-bottom:16px; }
+
+    /* outstanding alert banner */
+    .outstanding-banner {
+      background:rgba(239,68,68,0.07); border:1px solid #fca5a5; border-radius:8px;
+      padding:10px 14px; font-size:0.82rem; color:#dc2626; margin-top:14px;
+    }
+
+    /* school performance bars */
+    .perf-table .grade-item { margin-bottom:10px; }
+
+    /* quick action grid — 2×3 */
+    .quick-actions-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:10px;
+    }
+    .qa-btn {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:5px; padding:14px 8px; background:var(--light); border:none; border-radius:10px;
+      cursor:pointer; font-family:'Nunito',sans-serif; font-size:0.8rem; font-weight:700;
+      color:var(--navy); transition:all .2s; text-align:center;
+    }
+    .qa-btn:hover { background:var(--navy); color:#fff; transform:translateY(-2px); box-shadow:0 6px 16px rgba(13,37,96,0.18); }
+    .qa-btn .qa-icon { font-size:1.6rem; }
+
+    /* school notices */
+    .notice-compose-btn {
+      background:var(--navy); color:#fff; border:none; border-radius:6px;
+      padding:5px 12px; font-family:'Fredoka One',cursive; font-size:0.82rem; cursor:pointer;
+    }
+    .sch-notice-item { padding:10px 0; border-bottom:1px solid #f0f4fa; display:flex; gap:10px; }
+    .sch-notice-item:last-child { border-bottom:none; }
+    .sn-priority { width:8px; height:8px; border-radius:50%; margin-top:5px; flex-shrink:0; }
+    .sn-info strong { font-size:0.85rem; display:block; }
+    .sn-info span { font-size:0.75rem; color:var(--gray); }
+    .sn-meta { margin-left:auto; font-size:0.72rem; color:var(--gray); white-space:nowrap; }
+
+    /* mini calendar wrapper */
+    .cal-shell { background:var(--light); border-radius:10px; padding:12px; }
+
+    /* topbar action buttons */
+    .tb-action-btn {
+      background:var(--navy); color:#fff; border:none; border-radius:8px;
+      padding:7px 16px; font-family:'Fredoka One',cursive; font-size:0.85rem; cursor:pointer;
+    }
+    .tb-action-btn:hover { background:#1a3a6b; }
+
+    /* responsive */
+    @media(max-width:768px) {
+      .stats-grid-6 { grid-template-columns:repeat(2,1fr); }
+      .att-donut-wrap { flex-direction:column; align-items:flex-start; }
+      .quick-actions-grid { grid-template-columns:1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="dashboard-layout">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><img src="../images/logo.jpeg" alt="UTOL Schools Logo" /></div>
+      <div class="sidebar-brand"><strong>UTOL Schools</strong><span>Admin Portal</span></div>
+    </div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">PO</div>
+      <div class="sidebar-user-info"><strong>Prof. P. Okonkwo</strong><span>Principal / Administrator</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Overview</div>
+      <a href="admin-dashboard.html" class="active"><span class="nav-icon">&#128200;</span>Dashboard</a>
+
+      <div class="sidebar-section-label">Students</div>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="all-students"><span class="nav-icon">&#128101;</span>All Students</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="admissions"><span class="nav-icon">&#128196;</span>Admissions</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="attendance-overview"><span class="nav-icon">&#9989;</span>Attendance Overview</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="academic-records"><span class="nav-icon">&#128203;</span>Academic Records</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="exam-results"><span class="nav-icon">&#127891;</span>Exam Results</a>
+
+      <div class="sidebar-section-label">Staff</div>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="staff-directory"><span class="nav-icon">&#128104;&#8205;&#127979;</span>Staff Directory</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="leave-management"><span class="nav-icon">&#128197;</span>Leave Management <span class="nav-badge">3</span></a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="payroll"><span class="nav-icon">&#128176;</span>Payroll</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="appraisals"><span class="nav-icon">&#128202;</span>Appraisals</a>
+
+      <div class="sidebar-section-label">School Ops</div>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="classes-timetables"><span class="nav-icon">&#128218;</span>Classes &amp; Timetables</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="announcements"><span class="nav-icon">&#128276;</span>Announcements</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="events"><span class="nav-icon">&#128197;</span>School Calendar</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="cafeteria"><span class="nav-icon">&#127869;</span>Cafeteria</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="transport"><span class="nav-icon">&#128652;</span>Transport</a>
+
+      <div class="sidebar-section-label">Finance</div>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="fee-collection"><span class="nav-icon">&#128184;</span>Fee Collection <span class="nav-badge nav-badge-yellow">72</span></a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="financial-reports"><span class="nav-icon">&#128202;</span>Financial Reports</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="payroll-expenses"><span class="nav-icon">&#128184;</span>Payroll Expenses</a>
+
+      <div class="sidebar-section-label">System</div>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="user-management"><span class="nav-icon">&#128100;</span>User Management</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="settings"><span class="nav-icon">&#9881;&#65039;</span>Settings</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="audit-log"><span class="nav-icon">&#128274;</span>Audit Log</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="../index.html" class="sidebar-visit-link">&#127968; Visit School Website</a>
+      <button class="sidebar-logout" onclick="UTOL.signOut()">&#128682; Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="dashboard-main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" id="sidebarToggle">&#9776;</button>
+        <div class="topbar-title">
+          <h1>Admin Dashboard</h1>
+          <p>UTOL Schools &nbsp;|&nbsp; Academic Year 2024/2025 &nbsp;|&nbsp; <span id="adminDate"></span></p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="tb-action-btn" onclick="showToast('Opening announcement composer…','info')">&#128276; Announce</button>
+        <button class="topbar-icon-btn">&#128276;<span class="notif-dot"></span></button>
+        <button class="topbar-icon-btn">&#128140;</button>
+        <div class="topbar-profile">
+          <div class="topbar-avatar">PO</div>
+          <span>Prof. Okonkwo</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+
+      <!-- ── WELCOME BANNER ── -->
+      <div class="welcome-banner">
+        <div style="flex:1">
+          <h2 id="adminGreeting">Good Morning, Prof. Okonkwo! &#128081;</h2>
+          <p id="attendanceLine">School is running smoothly. 1,187 of 1,200 students are present today (98.9%).</p>
+          <div class="welcome-meta">
+            <span class="welcome-pill">&#127979; Term 2 – Week 8 of 13</span>
+            <span class="welcome-pill">&#128197; Next Event: Sports Day – Apr 14</span>
+            <span class="welcome-pill">&#128276; 5 Unread Alerts</span>
+            <span class="welcome-pill">&#128196; 37 Pending Applications</span>
+          </div>
+          <div class="term-progress-wrap">
+            <label>Term 2 Progress</label>
+            <div class="term-bar-bg"><div class="term-bar-fill" id="adminTermBar" style="width:0%"></div></div>
+            <div class="term-pct">8 of 13 weeks complete &nbsp;·&nbsp; 5 weeks remaining</div>
+          </div>
+        </div>
+        <div class="banner-emoji">&#127968;</div>
+      </div>
+
+      <!-- ── STATS GRID (6 cards) ── -->
+      <div class="stats-grid-6">
+        <div class="stat-card">
+          <div class="stat-icon si-navy">&#128101;</div>
+          <div class="stat-info"><div class="stat-val">1,200</div><div class="stat-label">Total Students</div></div>
+          <span class="stat-change change-up">&#8593; +48 YoY</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-green">&#128104;&#8205;&#127979;</div>
+          <div class="stat-info"><div class="stat-val">85</div><div class="stat-label">Active Staff</div></div>
+          <span class="stat-change change-up">&#8593; 3 new hires</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-yellow">&#128184;</div>
+          <div class="stat-info"><div class="stat-val">94%</div><div class="stat-label">Fee Collection</div></div>
+          <span class="stat-change change-up">&#8593; Term 2</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-purple">&#128196;</div>
+          <div class="stat-info"><div class="stat-val">37</div><div class="stat-label">Applications</div></div>
+          <span class="stat-change change-up">This week</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-green">&#9989;</div>
+          <div class="stat-info"><div class="stat-val">98.9%</div><div class="stat-label">Today's Attendance</div></div>
+          <span class="stat-change change-up">Above target</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-navy">&#127891;</div>
+          <div class="stat-info"><div class="stat-val">82.4%</div><div class="stat-label">School Avg (T1)</div></div>
+          <span class="stat-change change-up">&#8593; +3.1% vs last term</span>
+        </div>
+      </div>
+
+      <!-- ── ROW 1: Attendance Overview + Quick Actions + Calendar ── -->
+      <div class="content-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:24px;">
+
+        <!-- Attendance Overview -->
+        <div class="dash-card">
+          <div class="dash-card-header"><h3>&#9989; School Attendance – Today</h3><a href="#">Full Report</a></div>
+          <div class="dash-card-body">
+            <div class="att-donut-wrap">
+              <div class="att-donut">
+                <div class="att-donut-inner">
+                  <div class="att-donut-pct">98.9%</div>
+                  <div class="att-donut-sub">Present</div>
+                </div>
+              </div>
+              <div class="att-legend">
+                <div class="att-legend-item"><span class="att-legend-dot" style="background:var(--green)"></span>Present <strong>1,187</strong></div>
+                <div class="att-legend-item"><span class="att-legend-dot" style="background:#fca5a5"></span>Absent <strong>9</strong></div>
+                <div class="att-legend-item"><span class="att-legend-dot" style="background:var(--yellow)"></span>Late <strong>4</strong></div>
+              </div>
+            </div>
+            <div class="att-division-list">
+              <div class="att-div-row"><span class="att-div-label">Nursery</span><div class="att-div-bar-bg"><div class="att-div-bar" style="width:100%;"></div></div><span class="att-div-pct">100%</span></div>
+              <div class="att-div-row"><span class="att-div-label">KG</span><div class="att-div-bar-bg"><div class="att-div-bar" style="width:99%;"></div></div><span class="att-div-pct">99%</span></div>
+              <div class="att-div-row"><span class="att-div-label">P1–P3</span><div class="att-div-bar-bg"><div class="att-div-bar" style="width:98%;"></div></div><span class="att-div-pct">98%</span></div>
+              <div class="att-div-row"><span class="att-div-label">P4–P6</span><div class="att-div-bar-bg"><div class="att-div-bar" style="width:97%;background:var(--yellow);"></div></div><span class="att-div-pct">97%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dash-card">
+          <div class="dash-card-header"><h3>&#9889; Quick Actions</h3></div>
+          <div class="dash-card-body">
+            <div class="quick-actions-grid">
+              <button class="qa-btn" onclick="showToast('Opening announcement composer…','info')"><span class="qa-icon">&#128276;</span>Send Announcement</button>
+              <button class="qa-btn" onclick="showToast('Opening new enrolment form…','info')"><span class="qa-icon">&#128196;</span>New Enrolment</button>
+              <button class="qa-btn" onclick="showToast('Generating fee report…','info')"><span class="qa-icon">&#128202;</span>Fee Report</button>
+              <button class="qa-btn" onclick="showToast('Opening calendar editor…','info')"><span class="qa-icon">&#128197;</span>School Calendar</button>
+              <button class="qa-btn" onclick="showToast('Opening timetable builder…','info')"><span class="qa-icon">&#128218;</span>Timetable</button>
+              <button class="qa-btn" onclick="showToast('Generating staff payroll…','info')"><span class="qa-icon">&#128176;</span>Run Payroll</button>
+              <button class="qa-btn" onclick="showToast('Downloading student list…','success')"><span class="qa-icon">&#128190;</span>Export Data</button>
+              <button class="qa-btn" onclick="showToast('Opening SMS/email blast…','info')"><span class="qa-icon">&#128233;</span>Message Parents</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mini Calendar -->
+        <div class="dash-card">
+          <div class="dash-card-header"><h3>&#128197; School Calendar</h3><a href="#">All Events</a></div>
+          <div class="dash-card-body">
+            <div class="cal-shell">
+              <div class="cal-header">
+                <button class="cal-nav" id="calPrev">&#8249;</button>
+                <span class="cal-month" id="calMonthLabel"></span>
+                <button class="cal-nav" id="calNext">&#8250;</button>
+              </div>
+              <div class="cal-grid" id="calGrid"></div>
+            </div>
+            <div style="margin-top:12px;">
+              <div style="font-weight:700;font-size:0.82rem;color:var(--navy);margin-bottom:8px;">Upcoming Events</div>
+              <div style="font-size:0.8rem;padding:6px 0;border-bottom:1px solid #f0f4fa;"><span style="color:var(--green);font-weight:700;">Apr 14</span> &nbsp;Sports Day – All Classes</div>
+              <div style="font-size:0.8rem;padding:6px 0;border-bottom:1px solid #f0f4fa;"><span style="color:var(--yellow);font-weight:700;">Apr 25</span> &nbsp;Mid-Term Break Begins</div>
+              <div style="font-size:0.8rem;padding:6px 0;border-bottom:1px solid #f0f4fa;"><span style="color:var(--navy);font-weight:700;">May 5</span> &nbsp;School Resumes</div>
+              <div style="font-size:0.8rem;padding:6px 0;"><span style="color:#7c3aed;font-weight:700;">May 19</span> &nbsp;End-of-Term Exams Begin</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── COMPOSE ANNOUNCEMENT ── -->
+      <div class="dash-card" style="margin-bottom:24px;">
+        <div class="dash-card-header"><h3>&#128276; Compose Announcement</h3><a href="#">Announcement History</a></div>
+        <div class="dash-card-body">
+          <div class="compose-box">
+            <textarea id="announceText" placeholder="Type your announcement here (visible to parents, students, and staff)…"></textarea>
+            <div class="compose-meta">
+              <select id="announceAudience">
+                <option value="all">Everyone</option>
+                <option value="parents">Parents Only</option>
+                <option value="students">Students Only</option>
+                <option value="staff">Staff Only</option>
+                <option value="primary">Primary Division</option>
+                <option value="nursery">Nursery &amp; KG</option>
+              </select>
+              <select id="announcePriority">
+                <option value="normal">Normal Priority</option>
+                <option value="urgent">Urgent</option>
+                <option value="info">Informational</option>
+              </select>
+              <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;">
+                <input type="checkbox" id="announceSMS" /> Also send SMS
+              </label>
+              <button class="compose-send-btn" onclick="sendAnnouncement()">&#128276; Publish</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ROW 2: Enrolment + Alerts ── -->
+      <div class="content-grid" style="margin-bottom:24px;">
+
+        <!-- Enrolment by Class -->
+        <div class="dash-card">
+          <div class="dash-card-header"><h3>&#128202; Enrolment by Division</h3><a href="#">Full Report</a></div>
+          <div class="dash-card-body">
+            <div class="grade-list">
+              <div class="grade-item"><span class="grade-subject" style="min-width:100px;">Nursery 1–2</span><div class="grade-bar-wrap"><div class="grade-bar" style="width:0%;background:var(--yellow)" data-target="75"></div></div><span class="grade-score">180</span></div>
+              <div class="grade-item"><span class="grade-subject" style="min-width:100px;">KG 1–2</span><div class="grade-bar-wrap"><div class="grade-bar" style="width:0%;background:var(--navy)" data-target="80"></div></div><span class="grade-score">200</span></div>
+              <div class="grade-item"><span class="grade-subject" style="min-width:100px;">Primary 1–2</span><div class="grade-bar-wrap"><div class="grade-bar" style="width:0%;background:var(--green)" data-target="85"></div></div><span class="grade-score">220</span></div>
+              <div class="grade-item"><span class="grade-subject" style="min-width:100px;">Primary 3–4</span><div class="grade-bar-wrap"><div class="grade-bar" style="width:0%;background:#0277bd" data-target="78"></div></div><span class="grade-score">200</span></div>
+              <div class="grade-item"><span class="grade-subject" style="min-width:100px;">Primary 5–6</span><div class="grade-bar-wrap"><div class="grade-bar" style="width:0%;background:#7b1fa2" data-target="72"></div></div><span class="grade-score">180</span></div>
+            </div>
+            <div style="margin-top:16px;padding:12px;background:var(--light);border-radius:8px;display:flex;justify-content:space-between;font-size:0.82rem;flex-wrap:wrap;gap:8px;">
+              <span><strong>Total:</strong> 1,200</span>
+              <span><strong>Capacity:</strong> 1,400</span>
+              <span><strong>Utilisation:</strong> 86%</span>
+              <span><strong>Available:</strong> 200 places</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="dash-card">
+          <div class="dash-card-header"><h3>&#128680; Alerts &amp; Notifications</h3><a href="#">View All</a></div>
+          <div class="dash-card-body">
+            <div class="notice-list">
+              <div class="sch-notice-item">
+                <div class="sn-priority" style="background:#ef4444;"></div>
+                <div class="sn-info">
+                  <strong>5 Students – Repeat Absenteeism</strong>
+                  <span>Follow-up required with parents. Click to view list.</span>
+                </div>
+                <div class="sn-meta">Today<br><a href="#" style="color:var(--navy);font-weight:700;font-size:0.75rem;">Review ›</a></div>
+              </div>
+              <div class="sch-notice-item">
+                <div class="sn-priority" style="background:var(--yellow);"></div>
+                <div class="sn-info">
+                  <strong>37 Pending Admissions Applications</strong>
+                  <span>Awaiting assessment scheduling.</span>
+                </div>
+                <div class="sn-meta">This week<br><a href="#" style="color:var(--navy);font-weight:700;font-size:0.75rem;">Review ›</a></div>
+              </div>
+              <div class="sch-notice-item">
+                <div class="sn-priority" style="background:var(--navy);"></div>
+                <div class="sn-info">
+                  <strong>3 Staff Leave Requests Pending</strong>
+                  <span>Requires administrator approval.</span>
+                </div>
+                <div class="sn-meta">Yesterday<br><a href="#" style="color:var(--navy);font-weight:700;font-size:0.75rem;">Approve ›</a></div>
+              </div>
+              <div class="sch-notice-item">
+                <div class="sn-priority" style="background:var(--green);"></div>
+                <div class="sn-info">
+                  <strong>Term 3 Fee Collection Opens Soon</strong>
+                  <span>Parents to be notified by August 1st.</span>
+                </div>
+                <div class="sn-meta">Upcoming</div>
+              </div>
+              <div class="sch-notice-item">
+                <div class="sn-priority" style="background:#7c3aed;"></div>
+                <div class="sn-info">
+                  <strong>IT Infrastructure Maintenance</strong>
+                  <span>Scheduled Saturday 3:00 AM – 5:00 AM. Portal downtime expected.</span>
+                </div>
+                <div class="sn-meta">Apr 6<br><a href="#" style="color:var(--navy);font-weight:700;font-size:0.75rem;">Details ›</a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── RECENT ADMISSIONS ── -->
+      <div class="dash-card" style="margin-bottom:24px;">
+        <div class="dash-card-header">
+          <h3>&#128196; Recent Admissions Applications</h3>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <select style="border:1.5px solid #dce3ef;border-radius:6px;padding:5px 10px;font-family:'Nunito',sans-serif;font-size:0.8rem;outline:none;" onchange="filterAdmissions(this.value)">
+              <option value="all">All Statuses</option>
+              <option value="pending">Assessment Pending</option>
+              <option value="interview">Interview Scheduled</option>
+              <option value="offer">Offer Sent</option>
+              <option value="enrolled">Enrolled</option>
+              <option value="waitlist">Waitlist</option>
+            </select>
+            <a href="#" style="font-size:0.82rem;font-weight:700;color:var(--navy);">View All (37)</a>
+          </div>
+        </div>
+        <div class="dash-card-body" style="overflow-x:auto;">
+          <table class="dash-table" id="admissionsTable">
+            <thead><tr><th>Applicant Name</th><th>Class Applied</th><th>Parent / Guardian</th><th>Date Submitted</th><th>Status</th><th>Score</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr data-status="pending"><td><strong>Zara Adeyemi</strong></td><td>Primary 1</td><td>Mr. T. Adeyemi</td><td>Apr 2, 2025</td><td><span class="badge badge-yellow">Assessment Pending</span></td><td>–</td><td><button class="leave-approve" onclick="showToast('Opening Zara Adeyemi's application…','info')">Review</button></td></tr>
+              <tr data-status="interview"><td><strong>Kofi Mensah</strong></td><td>Nursery 2</td><td>Mrs. A. Mensah</td><td>Apr 1, 2025</td><td><span class="badge badge-blue">Interview Scheduled</span></td><td>–</td><td><button class="leave-approve" onclick="showToast('Opening Kofi Mensah's application…','info')">Review</button></td></tr>
+              <tr data-status="offer"><td><strong>Fatimah Lawal</strong></td><td>Primary 3</td><td>Alhaji M. Lawal</td><td>Mar 30, 2025</td><td><span class="badge badge-green">Offer Sent</span></td><td>91/100</td><td><button class="leave-approve" onclick="showToast('Offer confirmed for Fatimah Lawal.','success')">Confirm</button></td></tr>
+              <tr data-status="enrolled"><td><strong>Emeka Eze Jr.</strong></td><td>KG 1</td><td>Mr. E. Eze</td><td>Mar 28, 2025</td><td><span class="badge badge-navy">Enrolled</span></td><td>88/100</td><td><button style="background:var(--navy);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;font-weight:700;cursor:pointer;" onclick="showToast('Opening Emeka Eze Jr. profile…','info')">View</button></td></tr>
+              <tr data-status="waitlist"><td><strong>Sade Balogun</strong></td><td>Primary 6</td><td>Mrs. O. Balogun</td><td>Mar 27, 2025</td><td><span class="badge badge-red">Waitlist</span></td><td>74/100</td><td><button class="leave-approve" onclick="showToast('Opening Sade Balogun's application…','info')">Review</button></td></tr>
+              <tr data-status="pending"><td><strong>Tunde Okafor</strong></td><td>Primary 2</td><td>Mrs. R. Okafor</td><td>Mar 25, 2025</td><td><span class="badge badge-yellow">Assessment Pending</span></td><td>–</td><td><button class="leave-approve" onclick="showToast('Opening Tunde Okafor's application…','info')">Review</button></td></tr>
+              <tr data-status="interview"><td><strong>Amina Garba</strong></td><td>KG 2</td><td>Mallam A. Garba</td><td>Mar 23, 2025</td><td><span class="badge badge-blue">Interview Scheduled</span></td><td>–</td><td><button class="leave-approve" onclick="showToast('Opening Amina Garba's application…','info')">Review</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── ROW 3: Staff Leave + Fee Collection ── -->
+      <div class="content-grid" style="margin-bottom:24px;">
+
+        <!-- Staff Overview + Leave Requests -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <div class="dash-card">
+            <div class="dash-card-header"><h3>&#128104;&#8205;&#127979; Staff Overview</h3><a href="#">Manage Staff</a></div>
+            <div class="dash-card-body" style="overflow-x:auto;">
+              <table class="dash-table">
+                <thead><tr><th>Staff Member</th><th>Role</th><th>Department</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td>Mrs. E. Chukwu</td><td>Class Teacher – P4A</td><td>Upper Primary</td><td><span class="badge badge-green">Active</span></td></tr>
+                  <tr><td>Mr. B. Adewale</td><td>Director of Operations</td><td>Administration</td><td><span class="badge badge-green">Active</span></td></tr>
+                  <tr><td>Mr. Y. Mohammed</td><td>Head of ICT</td><td>Technology</td><td><span class="badge badge-green">Active</span></td></tr>
+                  <tr><td>Mrs. L. Babatunde</td><td>Admissions Officer</td><td>Admin</td><td><span class="badge badge-yellow">On Leave</span></td></tr>
+                  <tr><td>Mr. O. Balogun</td><td>Mathematics Teacher</td><td>Upper Primary</td><td><span class="badge badge-green">Active</span></td></tr>
+                  <tr><td>Miss A. Nwosu</td><td>English Teacher</td><td>Lower Primary</td><td><span class="badge badge-green">Active</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="dash-card">
+            <div class="dash-card-header"><h3>&#128197; Leave Requests <span style="background:#ef4444;color:#fff;border-radius:20px;padding:2px 8px;font-size:0.72rem;font-family:'Nunito',sans-serif;font-weight:700;">3 Pending</span></h3><a href="#">All Requests</a></div>
+            <div class="dash-card-body">
+              <div class="leave-item">
+                <div class="leave-avatar">LB</div>
+                <div class="leave-info">
+                  <strong>Mrs. L. Babatunde</strong>
+                  <span>Annual Leave &nbsp;·&nbsp; Apr 3 – Apr 10 (7 days)</span>
+                </div>
+                <div class="leave-actions">
+                  <button class="leave-approve" onclick="showToast('Leave approved for Mrs. Babatunde.','success')">Approve</button>
+                  <button class="leave-decline" onclick="showToast('Leave declined.','error')">Decline</button>
+                </div>
+              </div>
+              <div class="leave-item">
+                <div class="leave-avatar" style="background:var(--green)">KA</div>
+                <div class="leave-info">
+                  <strong>Mr. K. Asante</strong>
+                  <span>Sick Leave &nbsp;·&nbsp; Apr 4 – Apr 5 (2 days)</span>
+                </div>
+                <div class="leave-actions">
+                  <button class="leave-approve" onclick="showToast('Leave approved for Mr. Asante.','success')">Approve</button>
+                  <button class="leave-decline" onclick="showToast('Leave declined.','error')">Decline</button>
+                </div>
+              </div>
+              <div class="leave-item">
+                <div class="leave-avatar" style="background:#7b1fa2">FO</div>
+                <div class="leave-info">
+                  <strong>Mrs. F. Obi</strong>
+                  <span>Maternity Leave &nbsp;·&nbsp; Apr 14 – Jul 14 (90 days)</span>
+                </div>
+                <div class="leave-actions">
+                  <button class="leave-approve" onclick="showToast('Maternity leave approved for Mrs. Obi.','success')">Approve</button>
+                  <button class="leave-decline" onclick="showToast('Leave declined.','error')">Decline</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fee Collection -->
+        <div class="dash-card">
+          <div class="dash-card-header"><h3>&#128184; Fee Collection – Term 2</h3><a href="#">Full Report</a></div>
+          <div class="dash-card-body">
+            <div style="text-align:center;margin-bottom:20px;">
+              <div class="fee-big">94%</div>
+              <div class="fee-sub">&#8358;342.5M collected of &#8358;364.2M total &nbsp;·&nbsp; Term 2</div>
+            </div>
+            <div class="grade-list">
+              <div class="grade-item"><span class="grade-subject">Nursery</span><div class="grade-bar-wrap"><div class="grade-bar fee-anim" style="width:0%;background:var(--green)" data-target="98"></div></div><span class="grade-score" style="color:var(--green)">98%</span></div>
+              <div class="grade-item"><span class="grade-subject">KG</span><div class="grade-bar-wrap"><div class="grade-bar fee-anim" style="width:0%;background:var(--green)" data-target="96"></div></div><span class="grade-score" style="color:var(--green)">96%</span></div>
+              <div class="grade-item"><span class="grade-subject">P1–P3</span><div class="grade-bar-wrap"><div class="grade-bar fee-anim" style="width:0%;background:var(--yellow)" data-target="93"></div></div><span class="grade-score" style="color:#a07800">93%</span></div>
+              <div class="grade-item"><span class="grade-subject">P4–P6</span><div class="grade-bar-wrap"><div class="grade-bar fee-anim" style="width:0%;background:#f59e0b" data-target="88"></div></div><span class="grade-score" style="color:#f59e0b">88%</span></div>
+            </div>
+            <div class="outstanding-banner">
+              &#9888;&#65039; <strong>72 students</strong> have outstanding balances totalling &#8358;21.7M.
+              <button style="margin-left:10px;background:#dc2626;color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:0.75rem;font-weight:700;cursor:pointer;" onclick="showToast('Sending reminder SMS/email to 72 parent accounts…','info')">Send Reminders</button>
+            </div>
+            <div style="margin-top:16px;">
+              <div style="font-weight:700;font-size:0.82rem;color:var(--navy);margin-bottom:10px;">Recent Payments</div>
+              <table class="dash-table" style="font-size:0.78rem;">
+                <thead><tr><th>Student</th><th>Class</th><th>Amount</th><th>Date</th><th>Receipt</th></tr></thead>
+                <tbody>
+                  <tr><td>Kwame Asante</td><td>P5B</td><td>&#8358;285,000</td><td>Apr 3</td><td><a href="#" style="color:var(--navy);font-weight:700;">PDF</a></td></tr>
+                  <tr><td>Ngozi Okafor</td><td>P3A</td><td>&#8358;260,000</td><td>Apr 2</td><td><a href="#" style="color:var(--navy);font-weight:700;">PDF</a></td></tr>
+                  <tr><td>Ibrahim Musa</td><td>KG2</td><td>&#8358;220,000</td><td>Apr 1</td><td><a href="#" style="color:var(--navy);font-weight:700;">PDF</a></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ROW 4: School Performance + Cafeteria/Transport ── -->
+      <div class="content-grid" style="margin-bottom:24px;">
+
+        <!-- School Performance -->
+        <div class="dash-card">
+          <div class="dash-card-header"><h3>&#127891; School-Wide Academic Performance – Term 1</h3><a href="#">Full Report</a></div>
+          <div class="dash-card-body perf-table">
+            <div class="grade-list">
+              <div class="grade-item"><span class="grade-subject">English Language</span><div class="grade-bar-wrap"><div class="grade-bar perf-anim" style="width:0%;background:var(--navy)" data-target="84"></div></div><span class="grade-score">84%</span></div>
+              <div class="grade-item"><span class="grade-subject">Mathematics</span><div class="grade-bar-wrap"><div class="grade-bar perf-anim" style="width:0%;background:var(--green)" data-target="80"></div></div><span class="grade-score">80%</span></div>
+              <div class="grade-item"><span class="grade-subject">Science</span><div class="grade-bar-wrap"><div class="grade-bar perf-anim" style="width:0%;background:#0277bd" data-target="83"></div></div><span class="grade-score">83%</span></div>
+              <div class="grade-item"><span class="grade-subject">Social Studies</span><div class="grade-bar-wrap"><div class="grade-bar perf-anim" style="width:0%;background:var(--yellow)" data-target="86"></div></div><span class="grade-score">86%</span></div>
+              <div class="grade-item"><span class="grade-subject">RME / ICT</span><div class="grade-bar-wrap"><div class="grade-bar perf-anim" style="width:0%;background:#7b1fa2" data-target="89"></div></div><span class="grade-score">89%</span></div>
+              <div class="grade-item"><span class="grade-subject">Creative Arts</span><div class="grade-bar-wrap"><div class="grade-bar perf-anim" style="width:0%;background:#e91e63" data-target="91"></div></div><span class="grade-score">91%</span></div>
+            </div>
+            <div style="margin-top:14px;padding:12px;background:var(--light);border-radius:8px;font-size:0.82rem;display:flex;gap:20px;flex-wrap:wrap;">
+              <span><strong>School Average:</strong> 82.4%</span>
+              <span style="color:var(--green)"><strong>Top Class:</strong> P5B (91.2%)</span>
+              <span style="color:#dc2626"><strong>Needs Support:</strong> P4B (74.1%)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cafeteria + Transport -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <div class="dash-card">
+            <div class="dash-card-header"><h3>&#127869; Cafeteria – Today's Status</h3><a href="#">Manage Menu</a></div>
+            <div class="dash-card-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                <div style="background:var(--light);border-radius:8px;padding:12px;text-align:center;">
+                  <div style="font-family:'Fredoka One',cursive;font-size:1.6rem;color:var(--navy)">847</div>
+                  <div style="font-size:0.75rem;color:var(--gray);">Meals Served</div>
+                </div>
+                <div style="background:var(--light);border-radius:8px;padding:12px;text-align:center;">
+                  <div style="font-family:'Fredoka One',cursive;font-size:1.6rem;color:var(--green)">&#8358;423.5k</div>
+                  <div style="font-size:0.75rem;color:var(--gray);">Revenue Today</div>
+                </div>
+              </div>
+              <div style="font-size:0.82rem;margin-bottom:6px;font-weight:700;color:var(--navy);">Today's Menu</div>
+              <div style="font-size:0.8rem;padding:5px 0;border-bottom:1px solid #f0f4fa;">&#127858; Jollof Rice + Grilled Chicken</div>
+              <div style="font-size:0.8rem;padding:5px 0;border-bottom:1px solid #f0f4fa;">&#127833; Fresh Fruit Salad</div>
+              <div style="font-size:0.8rem;padding:5px 0;">&#129371; Zobo Drink (No sugar)</div>
+              <button style="margin-top:12px;width:100%;background:var(--light);border:1.5px solid #dce3ef;border-radius:8px;padding:8px;font-family:'Nunito',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;color:var(--navy);" onclick="showToast('Opening cafeteria menu editor…','info')">&#9999;&#65039; Edit Menu</button>
+            </div>
+          </div>
+
+          <div class="dash-card">
+            <div class="dash-card-header"><h3>&#128652; Transport Overview</h3><a href="#">Manage Routes</a></div>
+            <div class="dash-card-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                <div style="background:var(--light);border-radius:8px;padding:12px;text-align:center;">
+                  <div style="font-family:'Fredoka One',cursive;font-size:1.6rem;color:var(--navy)">8</div>
+                  <div style="font-size:0.75rem;color:var(--gray);">Active Buses</div>
+                </div>
+                <div style="background:var(--light);border-radius:8px;padding:12px;text-align:center;">
+                  <div style="font-family:'Fredoka One',cursive;font-size:1.6rem;color:var(--green)">324</div>
+                  <div style="font-size:0.75rem;color:var(--gray);">Students on Routes</div>
+                </div>
+              </div>
+              <div style="font-size:0.8rem;padding:6px 0;border-bottom:1px solid #f0f4fa;display:flex;justify-content:space-between;"><span>&#128652; Bus A – East Legon</span><span class="badge badge-green" style="padding:2px 8px;">On Route</span></div>
+              <div style="font-size:0.8rem;padding:6px 0;border-bottom:1px solid #f0f4fa;display:flex;justify-content:space-between;"><span>&#128652; Bus B – Spintex</span><span class="badge badge-green" style="padding:2px 8px;">On Route</span></div>
+              <div style="font-size:0.8rem;padding:6px 0;border-bottom:1px solid #f0f4fa;display:flex;justify-content:space-between;"><span>&#128652; Bus C – Tema</span><span class="badge badge-yellow" style="padding:2px 8px;">Delayed 10 min</span></div>
+              <div style="font-size:0.8rem;padding:6px 0;display:flex;justify-content:space-between;"><span>&#128652; Bus D – Adenta</span><span class="badge badge-green" style="padding:2px 8px;">On Route</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /dashboard-body -->
+  </main>
+</div>
+
+<script src="../js/supabase.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/portal-nav.js"></script>
+<script>
+/* ─ Portal sections ─ */
+window.PORTAL_SECTIONS = (function(h){
+var btn = h.btn, badge = h.badge, stats = h.stats, table = h.table,
+    divider = h.divider, card = h.card, field = h.field, row = h.row,
+    selectField = h.selectField, textarea = h.textarea;
+return {
+
+/* ── All Students ── */
+'all-students': { title:'&#128101; All Students',
+  html: stats([
+    {val:'482',label:'Total Students',bg:'#e8eaf6',color:'var(--navy)'},
+    {val:'247',label:'Male',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'235',label:'Female',bg:'#fce7f3',color:'#be185d'},
+    {val:'98%',label:'Active',bg:'#dcfce7',color:'#15803d'},
+  ])+divider('Student Registry')+
+  table(['Name','Class','Gender','Status','Action'],[
+    ['Amara Mensah','P4A','F',badge('Active','green'),btn('View','pnl-btn-navy',"showToast('Opening student profile...','info')")],
+    ['Kwame Asante','P5B','M',badge('Active','green'),btn('View','pnl-btn-navy',"showToast('Opening student profile...','info')")],
+    ['Ngozi Okafor','P3A','F',badge('Active','green'),btn('View','pnl-btn-navy',"showToast('Opening student profile...','info')")],
+    ['Ibrahim Musa','KG2','M',badge('Active','green'),btn('View','pnl-btn-navy',"showToast('Opening student profile...','info')")],
+    ['Chisom Eze','P6A','F',badge('Active','green'),btn('View','pnl-btn-navy',"showToast('Opening student profile...','info')")],
+    ['Emeka Nwosu','P2B','M',badge('Suspended','red'),btn('View','pnl-btn-navy',"showToast('Opening student profile...','info')")],
+    ['Zara Obi','P1A','F',badge('Active','green'),btn('View','pnl-btn-navy',"showToast('Opening student profile...','info')")],
+  ])+row([btn('+ Add Student','pnl-btn-green',"showToast('Add student form opened.','info')"),btn('Export CSV','pnl-btn-navy',"showToast('Student list exported.','success')")])
+},
+
+/* ── Admissions ── */
+'admissions': { title:'&#128196; Admissions',
+  html: stats([
+    {val:'37',label:'Applications',bg:'#e8eaf6',color:'var(--navy)'},
+    {val:'14',label:'Pending',bg:'#fef9c3',color:'#a07800'},
+    {val:'18',label:'Approved',bg:'#dcfce7',color:'#15803d'},
+    {val:'5',label:'Declined',bg:'#fee2e2',color:'#dc2626'},
+  ])+divider('Pending Applications')+
+  table(['Applicant','Class Sought','Date','Status','Action'],[
+    ['Tolu Adeyemi','P1A','Apr 4',badge('Pending','yellow'),btn('Review','pnl-btn-navy',"showToast('Application opened.','info')")],
+    ['Yemi Balogun','KG1','Apr 3',badge('Pending','yellow'),btn('Review','pnl-btn-navy',"showToast('Application opened.','info')")],
+    ['Fatima Hassan','P3B','Apr 2',badge('Interview','blue'),btn('Review','pnl-btn-navy',"showToast('Application opened.','info')")],
+    ['Daniel Osei','P5A','Apr 1',badge('Approved','green'),btn('Letter','pnl-btn-navy',"showToast('Acceptance letter sent.','success')")],
+    ['Aisha Musa','P2A','Mar 30',badge('Declined','red'),btn('View','pnl-btn-navy',"showToast('Application opened.','info')")],
+  ])+row([btn('+ New Application','pnl-btn-green',"showToast('New application form opened.','info')"),btn('Export','pnl-btn-navy',"showToast('Exported.','success')")])
+},
+
+/* ── Attendance Overview ── */
+'attendance-overview': { title:'&#9989; Attendance Overview',
+  html: stats([
+    {val:'94%',label:"Today's Rate",bg:'#dcfce7',color:'#15803d'},
+    {val:'456',label:'Present',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'18',label:'Absent',bg:'#fee2e2',color:'#dc2626'},
+    {val:'8',label:'Late',bg:'#fef9c3',color:'#a07800'},
+  ])+divider('Attendance by Class – Today')+
+  table(['Class','Teacher','Present','Absent','Rate'],[
+    ['P6A','Mr. Owusu','32','1','97%'],
+    ['P5B','Mrs. Addo','29','3','91%'],
+    ['P4A','Mr. Mensah','31','0','100%'],
+    ['P3A','Mrs. Boateng','28','2','93%'],
+    ['P2B','Mr. Asante','27','4','87%'],
+    ['KG2','Mrs. Okafor','22','1','96%'],
+  ])+row([btn('Full Report','pnl-btn-navy',"showToast('Full attendance report generated.','success')"),btn('Send Alerts','pnl-btn-yellow',"showToast('Absence alerts sent to parents.','success')")])
+},
+
+/* ── Academic Records ── */
+'academic-records': { title:'&#128203; Academic Records',
+  html: stats([
+    {val:'A',label:'School Average Grade',bg:'#dcfce7',color:'#15803d'},
+    {val:'78%',label:'Pass Rate',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'12',label:'Honours Students',bg:'#f3e8ff',color:'#7c3aed'},
+    {val:'3',label:'At-Risk Students',bg:'#fee2e2',color:'#dc2626'},
+  ])+divider('Term 2 – Academic Summary by Class')+
+  table(['Class','Avg Score','Highest','Lowest','Pass Rate'],[
+    ['P6A','82.4%','96%','61%','100%'],
+    ['P5B','79.1%','94%','58%','97%'],
+    ['P4A','76.8%','91%','55%','94%'],
+    ['P3A','74.5%','90%','52%','91%'],
+    ['P2B','72.3%','88%','49%','89%'],
+    ['KG2','80.6%','95%','62%','98%'],
+  ])+row([btn('Full Report','pnl-btn-navy',"showToast('Academic report generated.','success')"),btn('Export PDF','pnl-btn-navy',"showToast('PDF exported.','success')")])
+},
+
+/* ── Exam Results ── */
+'exam-results': { title:'&#127891; Exam Results',
+  html: stats([
+    {val:'Term 2',label:'Current Term',bg:'#e8eaf6',color:'var(--navy)'},
+    {val:'482',label:'Students Assessed',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'78%',label:'Pass Rate',bg:'#dcfce7',color:'#15803d'},
+    {val:'22',label:'Distinctions',bg:'#fef9c3',color:'#a07800'},
+  ])+divider('Top Performers – Term 2')+
+  table(['Rank','Student','Class','Score','Grade'],[
+    ['1st','Chisom Eze','P6A','96.4%',badge('A+','green')],
+    ['2nd','Yemi Addo','P5B','94.1%',badge('A+','green')],
+    ['3rd','Amara Mensah','P4A','91.8%',badge('A','green')],
+    ['4th','Kofi Boateng','P6A','90.2%',badge('A','green')],
+    ['5th','Nkechi Eze','P3A','89.7%',badge('A','green')],
+  ])+divider('Publish Results')+
+  row([btn('Publish to Parents','pnl-btn-green',"showToast('Results published to parent portals.','success')"),btn('Print All','pnl-btn-navy',"showToast('Printing results...','info')")])
+},
+
+/* ── Staff Directory ── */
+'staff-directory': { title:'&#128104;&#8205;&#127979; Staff Directory',
+  html: stats([
+    {val:'38',label:'Total Staff',bg:'#e8eaf6',color:'var(--navy)'},
+    {val:'24',label:'Teaching',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'14',label:'Non-Teaching',bg:'#f3e8ff',color:'#7c3aed'},
+    {val:'36',label:'Active Today',bg:'#dcfce7',color:'#15803d'},
+  ])+divider('Staff List')+
+  table(['Name','Role','Department','Status','Action'],[
+    ['Mr. Kweku Owusu','Class Teacher','Primary 6A',badge('Present','green'),btn('View','pnl-btn-navy',"showToast('Staff profile opened.','info')")],
+    ['Mrs. Abena Addo','Class Teacher','Primary 5B',badge('Present','green'),btn('View','pnl-btn-navy',"showToast('Staff profile opened.','info')")],
+    ['Mr. Kofi Mensah','Class Teacher','Primary 4A',badge('On Leave','yellow'),btn('View','pnl-btn-navy',"showToast('Staff profile opened.','info')")],
+    ['Mrs. Ama Boateng','Class Teacher','Primary 3A',badge('Present','green'),btn('View','pnl-btn-navy',"showToast('Staff profile opened.','info')")],
+    ['Mr. Yaw Asante','Sciences HOD','Science Dept',badge('Present','green'),btn('View','pnl-btn-navy',"showToast('Staff profile opened.','info')")],
+    ['Mrs. Grace Osei','Librarian','Library',badge('Present','green'),btn('View','pnl-btn-navy',"showToast('Staff profile opened.','info')")],
+  ])+row([btn('+ Add Staff','pnl-btn-green',"showToast('Add staff form opened.','info')"),btn('Export','pnl-btn-navy',"showToast('Staff list exported.','success')")])
+},
+
+/* ── Leave Management ── */
+'leave-management': { title:'&#128197; Leave Management',
+  html: stats([
+    {val:'3',label:'Pending',bg:'#fef9c3',color:'#a07800'},
+    {val:'8',label:'Approved (Term)',bg:'#dcfce7',color:'#15803d'},
+    {val:'2',label:'Declined',bg:'#fee2e2',color:'#dc2626'},
+    {val:'1',label:'On Leave Now',bg:'#dbeafe',color:'#1d4ed8'},
+  ])+divider('Pending Leave Requests')+
+  table(['Staff','Type','From','To','Reason','Action'],[
+    ['Mr. Kofi Mensah','Medical','Apr 7','Apr 11','Medical procedure',
+      btn('Approve','pnl-btn-green',"showToast('Leave approved. Mr. Mensah notified.','success')")+' '+
+      btn('Decline','pnl-btn-red',"showToast('Leave declined.','info')")],
+    ['Mrs. Grace Osei','Personal','Apr 14','Apr 14','Family event',
+      btn('Approve','pnl-btn-green',"showToast('Leave approved. Mrs. Osei notified.','success')")+' '+
+      btn('Decline','pnl-btn-red',"showToast('Leave declined.','info')")],
+    ['Mr. Yaw Darko','Annual','May 5','May 9','Annual leave',
+      btn('Approve','pnl-btn-green',"showToast('Leave approved. Mr. Darko notified.','success')")+' '+
+      btn('Decline','pnl-btn-red',"showToast('Leave declined.','info')")],
+  ])+row([btn('Leave Policy','pnl-btn-navy',"showToast('Leave policy document opened.','info')")])
+},
+
+/* ── Payroll ── */
+'payroll': { title:'&#128176; Staff Payroll',
+  html: stats([
+    {val:'GH₵ 184,500',label:'This Month Total',bg:'#dcfce7',color:'#15803d'},
+    {val:'38',label:'Staff on Payroll',bg:'#e8eaf6',color:'var(--navy)'},
+    {val:'GH₵ 4,855',label:'Average Salary',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'Processed',label:'April Status',bg:'#dcfce7',color:'#15803d'},
+  ])+divider('Payroll Summary – April 2025')+
+  table(['Staff','Role','Gross Pay','Deductions','Net Pay','Status'],[
+    ['Mr. Kweku Owusu','Class Teacher','GH₵ 6,200','GH₵ 620','GH₵ 5,580',badge('Paid','green')],
+    ['Mrs. Abena Addo','Class Teacher','GH₵ 6,000','GH₵ 600','GH₵ 5,400',badge('Paid','green')],
+    ['Mr. Kofi Mensah','Class Teacher','GH₵ 5,800','GH₵ 580','GH₵ 5,220',badge('Paid','green')],
+    ['Mrs. Ama Boateng','Class Teacher','GH₵ 5,800','GH₵ 580','GH₵ 5,220',badge('Paid','green')],
+    ['Mr. Yaw Asante','HOD Sciences','GH₵ 7,200','GH₵ 720','GH₵ 6,480',badge('Paid','green')],
+  ])+row([btn('Run Payroll','pnl-btn-green',"showToast('Payroll processing initiated.','success')"),btn('Export Payslips','pnl-btn-navy',"showToast('All payslips generated.','success')")])
+},
+
+/* ── Appraisals ── */
+'appraisals': { title:'&#128202; Staff Appraisals',
+  html: stats([
+    {val:'38',label:'Staff Total',bg:'#e8eaf6',color:'var(--navy)'},
+    {val:'31',label:'Appraised',bg:'#dcfce7',color:'#15803d'},
+    {val:'7',label:'Pending',bg:'#fef9c3',color:'#a07800'},
+    {val:'4.2/5',label:'Avg Score',bg:'#dbeafe',color:'#1d4ed8'},
+  ])+divider('Term 2 Appraisal Results')+
+  table(['Staff','Role','Score','Rating','Action'],[
+    ['Mr. Kweku Owusu','Class Teacher','4.7/5',badge('Excellent','green'),btn('View','pnl-btn-navy',"showToast('Appraisal report opened.','info')")],
+    ['Mrs. Abena Addo','Class Teacher','4.5/5',badge('Excellent','green'),btn('View','pnl-btn-navy',"showToast('Appraisal report opened.','info')")],
+    ['Mr. Kofi Mensah','Class Teacher','4.1/5',badge('Good','blue'),btn('View','pnl-btn-navy',"showToast('Appraisal report opened.','info')")],
+    ['Mrs. Ama Boateng','Class Teacher','3.8/5',badge('Good','blue'),btn('View','pnl-btn-navy',"showToast('Appraisal report opened.','info')")],
+    ['Mr. Yaw Darko','Sports Coach','3.2/5',badge('Fair','yellow'),btn('View','pnl-btn-navy',"showToast('Appraisal report opened.','info')")],
+  ])+row([btn('+ New Appraisal','pnl-btn-navy',"showToast('Appraisal form opened.','info')"),btn('Export Results','pnl-btn-navy',"showToast('Appraisals exported.','success')")])
+},
+
+/* ── Classes & Timetables ── */
+'classes-timetables': { title:'&#128218; Classes &amp; Timetables',
+  html: stats([
+    {val:'14',label:'Active Classes',bg:'#e8eaf6',color:'var(--navy)'},
+    {val:'482',label:'Students Enrolled',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'38',label:'Teachers',bg:'#dcfce7',color:'#15803d'},
+    {val:'6',label:'Divisions',bg:'#f3e8ff',color:'#7c3aed'},
+  ])+divider('Class Overview')+
+  table(['Class','Teacher','Students','Subjects','Status'],[
+    ['Primary 6A','Mr. Kweku Owusu','33',badge('8 Subjects','blue'),badge('Active','green')],
+    ['Primary 5B','Mrs. Abena Addo','32',badge('8 Subjects','blue'),badge('Active','green')],
+    ['Primary 4A','Mr. Kofi Mensah','31',badge('7 Subjects','blue'),badge('Active','green')],
+    ['Primary 3A','Mrs. Ama Boateng','30',badge('7 Subjects','blue'),badge('Active','green')],
+    ['KG2','Mrs. Ngozi Okafor','23',badge('5 Subjects','blue'),badge('Active','green')],
+    ['KG1','Mr. Yaw Darko','21',badge('5 Subjects','blue'),badge('Active','green')],
+  ])+row([btn('Manage Classes','pnl-btn-navy',"showToast('Class management opened.','info')"),btn('Edit Timetables','pnl-btn-navy',"showToast('Timetable editor opened.','info')")])
+},
+
+/* ── Cafeteria ── */
+'cafeteria': { title:'&#127869; Cafeteria Management',
+  html: stats([
+    {val:'312',label:"Today's Meal Count",bg:'#dcfce7',color:'#15803d'},
+    {val:'GH₵ 4,680',label:'Revenue Today',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'3',label:'Menu Items',bg:'#fef9c3',color:'#a07800'},
+    {val:'Low',label:'Stock Alert',bg:'#fee2e2',color:'#dc2626'},
+  ])+divider("Today's Menu – Monday")+
+  table(['Item','Price','Orders','Status'],[
+    ['Jollof Rice + Chicken','GH₵ 18','142',badge('Available','green')],
+    ['Waakye + Egg','GH₵ 14','98',badge('Available','green')],
+    ['Vegetable Fried Rice','GH₵ 16','72',badge('Running Low','yellow')],
+    ['Fruit Juice','GH₵ 6','180',badge('Available','green')],
+    ['Mineral Water','GH₵ 3','210',badge('Available','green')],
+  ])+divider('Manage Menu')+
+  field('New Menu Item','text','Enter menu item name')+
+  field('Price (GH₵)','number','0.00')+
+  row([btn('Add Item','pnl-btn-green',"showToast('Menu item added.','success')"),btn('Print Menu','pnl-btn-navy',"showToast('Menu printed.','success')")])
+},
+
+/* ── Transport ── */
+'transport': { title:'&#128652; Transport Management',
+  html: stats([
+    {val:'8',label:'Active Buses',bg:'#dcfce7',color:'#15803d'},
+    {val:'186',label:'Students Using Transport',bg:'#e8eaf6',color:'var(--navy)'},
+    {val:'6',label:'Routes',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'All On Time',label:"Today's Status",bg:'#dcfce7',color:'#15803d'},
+  ])+divider('Bus Routes')+
+  table(['Route','Driver','Bus No.','Students','Status'],[
+    ['East Legon – Achimota','Mr. Kojo Darko','Bus 01','34',badge('On Route','green')],
+    ['Tema – School','Mr. Ato Mensah','Bus 02','28',badge('Arrived','blue')],
+    ['Spintex – School','Mr. Kofi Adu','Bus 03','31',badge('On Route','green')],
+    ['Adenta – School','Mr. Kwesi Asante','Bus 04','29',badge('Arrived','blue')],
+    ['Airport – School','Mr. Yaw Frimpong','Bus 05','24',badge('Delayed','yellow')],
+    ['Haatso – School','Mr. Paa Kofi','Bus 06','40',badge('On Route','green')],
+  ])+row([btn('Track Buses','pnl-btn-navy',"showToast('Live tracking map opened.','info')"),btn('Send Alert','pnl-btn-yellow',"showToast('Driver alert sent.','success')")])
+},
+
+/* ── Fee Collection ── */
+'fee-collection': { title:'&#128184; Fee Collection',
+  html: stats([
+    {val:'GH₵ 2.8M',label:'Collected (Term 2)',bg:'#dcfce7',color:'#15803d'},
+    {val:'GH₵ 420K',label:'Outstanding',bg:'#fee2e2',color:'#dc2626'},
+    {val:'87%',label:'Collection Rate',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'62',label:'Pending Payments',bg:'#fef9c3',color:'#a07800'},
+  ])+divider('Recent Payments')+
+  table(['Student','Class','Amount','Date','Method','Status'],[
+    ['Kwame Asante','P5B','GH₵ 285,000','Apr 3','Bank Transfer',badge('Paid','green')],
+    ['Ngozi Okafor','P3A','GH₵ 260,000','Apr 2','Mobile Money',badge('Paid','green')],
+    ['Ibrahim Musa','KG2','GH₵ 220,000','Apr 1','Cash',badge('Paid','green')],
+    ['Chisom Eze','P6A','GH₵ 285,000','Mar 30','Bank Transfer',badge('Paid','green')],
+    ['Tolu Adeyemi','P1A','GH₵ 240,000','—','—',badge('Pending','yellow')],
+  ])+divider('Record Payment')+
+  field('Student Name / ID','text','Search student...')+
+  field('Amount (GH₵)','number','0.00')+
+  selectField('Payment Method',['Bank Transfer','Mobile Money','Cash','Cheque'])+
+  row([btn('Record Payment','pnl-btn-green',"showToast('Payment recorded successfully.','success')"),btn('Send Reminder','pnl-btn-yellow',"showToast('Payment reminder sent to all pending families.','success')")])
+},
+
+/* ── Financial Reports ── */
+'financial-reports': { title:'&#128202; Financial Reports',
+  html: stats([
+    {val:'GH₵ 3.2M',label:'Total Revenue (Term 2)',bg:'#dcfce7',color:'#15803d'},
+    {val:'GH₵ 2.1M',label:'Total Expenses',bg:'#fee2e2',color:'#dc2626'},
+    {val:'GH₵ 1.1M',label:'Net Balance',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'+12%',label:'vs Term 1',bg:'#dcfce7',color:'#15803d'},
+  ])+divider('Revenue Breakdown')+
+  table(['Category','Budgeted','Actual','Variance'],[
+    ['School Fees','GH₵ 2.8M','GH₵ 2.8M',badge('On Track','green')],
+    ['Transport Fees','GH₵ 250K','GH₵ 242K',badge('-3%','yellow')],
+    ['Cafeteria','GH₵ 180K','GH₵ 194K',badge('+8%','green')],
+    ['Other Income','GH₵ 60K','GH₵ 58K',badge('-3%','yellow')],
+  ])+divider('Expense Breakdown')+
+  table(['Category','Budgeted','Actual','Status'],[
+    ['Staff Salaries','GH₵ 1.1M','GH₵ 1.1M',badge('Paid','green')],
+    ['Utilities','GH₵ 45K','GH₵ 48K',badge('+7%','yellow')],
+    ['Maintenance','GH₵ 80K','GH₵ 72K',badge('-10%','green')],
+    ['Supplies','GH₵ 60K','GH₵ 58K',badge('-3%','green')],
+  ])+row([btn('Export PDF','pnl-btn-navy',"showToast('Financial report exported.','success')"),btn('Print Report','pnl-btn-navy',"showToast('Printing...','info')")])
+},
+
+/* ── Payroll Expenses ── */
+'payroll-expenses': { title:'&#128184; Payroll Expenses',
+  html: stats([
+    {val:'GH₵ 184,500',label:'April Total',bg:'#dcfce7',color:'#15803d'},
+    {val:'GH₵ 18,450',label:'SSNIT (10%)',bg:'#fef9c3',color:'#a07800'},
+    {val:'GH₵ 11,070',label:'Income Tax (6%)',bg:'#fee2e2',color:'#dc2626'},
+    {val:'GH₵ 154,980',label:'Net Payroll',bg:'#dbeafe',color:'#1d4ed8'},
+  ])+divider('Monthly Payroll Trend')+
+  table(['Month','Gross','SSNIT','Tax','Net'],[
+    ['January 2025','GH₵ 181,200','GH₵ 18,120','GH₵ 10,872','GH₵ 152,208'],
+    ['February 2025','GH₵ 182,400','GH₵ 18,240','GH₵ 10,944','GH₵ 153,216'],
+    ['March 2025','GH₵ 184,500','GH₵ 18,450','GH₵ 11,070','GH₵ 154,980'],
+    ['April 2025','GH₵ 184,500','GH₵ 18,450','GH₵ 11,070','GH₵ 154,980'],
+  ])+row([btn('Export Payroll','pnl-btn-navy',"showToast('Payroll export ready.','success')"),btn('Submit to GRA','pnl-btn-navy',"showToast('Payroll data submitted to GRA.','success')")])
+},
+
+/* ── User Management ── */
+'user-management': { title:'&#128100; User Management',
+  html: stats([
+    {val:'38',label:'Staff Accounts',bg:'#e8eaf6',color:'var(--navy)'},
+    {val:'482',label:'Student Accounts',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'310',label:'Parent Accounts',bg:'#dcfce7',color:'#15803d'},
+    {val:'2',label:'Admins',bg:'#f3e8ff',color:'#7c3aed'},
+  ])+divider('User Accounts')+
+  table(['User','Role','Email','Last Login','Action'],[
+    ['Mr. Kweku Owusu','Staff','utol.staff@utolschools.edu.gh','Today',btn('Manage','pnl-btn-navy',"showToast('User account opened.','info')")],
+    ['Mrs. Amara Mensah','Parent','amara.p@gmail.com','Yesterday',btn('Manage','pnl-btn-navy',"showToast('User account opened.','info')")],
+    ['Chisom Eze','Student','—','Today',btn('Manage','pnl-btn-navy',"showToast('User account opened.','info')")],
+    ['Admin User','Admin','utol.admin@utolschools.edu.gh','Today',btn('Manage','pnl-btn-navy',"showToast('User account opened.','info')")],
+  ])+divider('Create Account')+
+  field('Full Name','text','Enter name')+
+  selectField('Role',['Student','Parent','Staff','Admin'])+
+  field('Email','email','user@email.com')+
+  row([btn('Create Account','pnl-btn-green',"showToast('Account created. Credentials sent via email.','success')")])
+},
+
+/* ── Settings ── */
+'settings': { title:'&#9881;&#65039; School Settings',
+  html: card(
+    '<div style="font-family:'Fredoka One',cursive;color:var(--navy);font-size:1rem;margin-bottom:14px;">School Information</div>'+
+    field('School Name','text','','UTOL Schools')+
+    field('Principal','text','','Mrs. Akosua Okonkwo')+
+    field('Email','email','','admin@utolschools.edu.gh')+
+    field('Phone','tel','','+233 30 123 4567')+
+    row([btn('Save Changes','pnl-btn-green',"showToast('School information updated.','success')")])
+  ,'#f0f4ff')+
+  card(
+    '<div style="font-family:'Fredoka One',cursive;color:var(--navy);font-size:1rem;margin-bottom:14px;">Academic Settings</div>'+
+    selectField('Current Term',['Term 1','Term 2','Term 3'],'Term 2')+
+    selectField('Academic Year',['2024/2025','2025/2026'],'2024/2025')+
+    field('Term Start Date','date','','')+
+    field('Term End Date','date','','')+
+    row([btn('Update','pnl-btn-green',"showToast('Academic settings updated.','success')")])
+  ,'#f0f4ff')
+},
+
+/* ── Audit Log ── */
+'audit-log': { title:'&#128274; Audit Log',
+  html: stats([
+    {val:'1,284',label:'Events Today',bg:'#e8eaf6',color:'var(--navy)'},
+    {val:'18',label:'Login Events',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'3',label:'Failed Logins',bg:'#fee2e2',color:'#dc2626'},
+    {val:'47',label:'Data Changes',bg:'#fef9c3',color:'#a07800'},
+  ])+divider('Recent Activity')+
+  table(['Time','User','Action','IP Address'],[
+    ['08:14 AM','Admin','Login successful','192.168.1.1'],
+    ['08:20 AM','Mr. Owusu','Viewed student records','192.168.1.22'],
+    ['08:35 AM','Mrs. Addo','Updated grades – P5B','192.168.1.31'],
+    ['09:02 AM','Admin','Created user account','192.168.1.1'],
+    ['09:15 AM','Unknown','Failed login attempt','41.66.12.88'],
+    ['09:22 AM','Admin','Approved leave request','192.168.1.1'],
+    ['10:01 AM','Mr. Mensah','Submitted attendance','192.168.1.45'],
+  ])+row([btn('Export Log','pnl-btn-navy',"showToast('Audit log exported.','success')"),btn('Clear Old Logs','pnl-btn-red',"showToast('Logs older than 90 days cleared.','success')")])
+},
+
+};})(window._h);
+</script>
+<script>
+  /* ── Auth guard: redirect to login if not authenticated ── */
+  (async () => {
+    const user = await UTOL.requireAuth('admin');
+    if (!user) return;
+  })();
+  /* ── Sidebar toggle ── */
+  document.getElementById('sidebarToggle').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+
+  /* ── Greeting + date ── */
+  (function () {
+    const h = new Date().getHours();
+    const greeting = h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening';
+    document.getElementById('adminGreeting').textContent = greeting + ', Prof. Okonkwo! 👑';
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const now = new Date();
+    document.getElementById('adminDate').textContent =
+      days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+  })();
+
+  /* ── Animate all bars on load ── */
+  window.addEventListener('load', () => {
+    /* Term progress bar — 8/13 weeks = 61.5% */
+    setTimeout(() => {
+      document.getElementById('adminTermBar').style.width = '61.5%';
+    }, 400);
+
+    /* Enrolment, fee, performance bars */
+    document.querySelectorAll('.grade-bar[data-target], .fee-anim[data-target], .perf-anim[data-target]').forEach(bar => {
+      const target = bar.dataset.target + '%';
+      bar.style.transition = 'none';
+      bar.style.width = '0%';
+      setTimeout(() => {
+        bar.style.transition = 'width 0.9s ease';
+        bar.style.width = target;
+      }, 300);
+    });
+
+    /* Attendance division bars (inline width already set, just add transition) */
+    document.querySelectorAll('.att-div-bar').forEach(bar => {
+      const w = bar.style.width;
+      bar.style.width = '0%';
+      bar.style.transition = 'none';
+      setTimeout(() => {
+        bar.style.transition = 'width 0.9s ease';
+        bar.style.width = w;
+      }, 500);
+    });
+  });
+
+  /* ── Admissions filter ── */
+  function filterAdmissions(val) {
+    document.querySelectorAll('#admissionsTable tbody tr').forEach(row => {
+      row.style.display = (val === 'all' || row.dataset.status === val) ? '' : 'none';
+    });
+  }
+
+  /* ── Compose announcement ── */
+  function sendAnnouncement() {
+    const text = document.getElementById('announceText').value.trim();
+    if (!text) { showToast('Please type an announcement before publishing.', 'error'); return; }
+    const audience = document.getElementById('announceAudience').options[document.getElementById('announceAudience').selectedIndex].text;
+    const sms = document.getElementById('announceSMS').checked;
+    showToast('Announcement published to ' + audience + (sms ? ' + SMS sent.' : '.'), 'success');
+    document.getElementById('announceText').value = '';
+  }
+
+
+
+</script>
+</body>
+</html>
