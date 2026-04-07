@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Dashboard – UTOL Schools Portal</title>
+  <link rel="stylesheet" href="../css/portal.css" />
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    /* ---- Streak badge ---- */
+    .streak-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(244,199,10,0.18);
+      border: 1px solid rgba(244,199,10,0.4);
+      border-radius: 50px;
+      padding: 5px 14px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--yellow);
+      margin-top: 10px;
+    }
+    .streak-badge .streak-fire { font-size: 1rem; }
+
+    /* ---- Term progress bar ---- */
+    .term-progress-wrap {
+      margin-top: 10px;
+    }
+    .term-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      opacity: 0.7;
+      margin-bottom: 5px;
+    }
+    .term-progress-track {
+      height: 6px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .term-progress-fill {
+      height: 100%;
+      background: var(--yellow);
+      border-radius: 3px;
+      width: 62%;
+    }
+
+    /* ---- Subject pills ---- */
+    .subject-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    .subject-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.85);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .subject-pill .sp-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+    }
+
+    /* ---- Priority badge in table ---- */
+    .priority-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .priority-high   { background: #ef4444; }
+    .priority-medium { background: #f59e0b; }
+    .priority-low    { background: #22c55e; }
+
+    /* ---- Progress ring ---- */
+    .stat-ring-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .ring-svg { transform: rotate(-90deg); }
+    .ring-bg { fill: none; stroke: var(--light); stroke-width: 6; }
+    .ring-fill { fill: none; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+    .ring-label {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .stat-ring-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* ---- Messages ---- */
+    .msg-item {
+      display: flex;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .msg-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .msg-item:hover { opacity: 0.85; }
+    .msg-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fredoka One', cursive;
+      font-size: 0.85rem;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+    .msg-body { flex: 1; min-width: 0; }
+    .msg-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .msg-name { font-size: 0.85rem; font-weight: 700; color: var(--navy); }
+    .msg-time { font-size: 0.7rem; color: var(--gray); white-space: nowrap; }
+    .msg-preview { font-size: 0.78rem; color: var(--gray); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .msg-unread .msg-name::after {
+      content: '';
+      display: inline-block;
+      width: 7px; height: 7px;
+      background: var(--navy);
+      border-radius: 50%;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    /* ---- Club card ---- */
+    .club-list { display: flex; flex-direction: column; gap: 10px; }
+    .club-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--light);
+      border-radius: 10px;
+      transition: var(--transition);
+    }
+    .club-item:hover { background: #dbe4ff; }
+    .club-icon { font-size: 1.4rem; }
+    .club-info { flex: 1; }
+    .club-info strong { font-size: 0.85rem; display: block; color: var(--navy); }
+    .club-info span { font-size: 0.74rem; color: var(--gray); }
+    .club-day {
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: var(--white);
+      color: var(--navy);
+      padding: 3px 9px;
+      border-radius: 20px;
+    }
+
+    /* ---- Resources ---- */
+    .resource-list { display: flex; flex-direction: column; gap: 10px; }
+    .resource-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--light);
+      border-radius: 10px;
+      transition: var(--transition);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .resource-item:hover { background: #dbe4ff; }
+    .resource-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .resource-info strong { font-size: 0.82rem; color: var(--navy); display: block; }
+    .resource-info span { font-size: 0.72rem; color: var(--gray); }
+    .resource-arrow { margin-left: auto; color: var(--gray); font-size: 0.8rem; }
+
+    /* ---- Achievement card enhanced ---- */
+    .achievement-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .achievement-card {
+      text-align: center;
+      padding: 20px 14px;
+      border-radius: 12px;
+      position: relative;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    .achievement-card:hover { transform: translateY(-3px); }
+    .achievement-card.locked { opacity: 0.45; filter: grayscale(0.6); }
+    .achievement-card.locked::after {
+      content: '🔒';
+      position: absolute;
+      top: 8px; right: 8px;
+      font-size: 0.7rem;
+    }
+    .achievement-emoji { font-size: 2.4rem; margin-bottom: 8px; }
+    .achievement-card strong { font-size: 0.78rem; display: block; color: var(--navy); line-height: 1.3; }
+    .achievement-card span { font-size: 0.68rem; color: var(--gray); }
+
+    /* ---- Goal tracker ---- */
+    .goal-list { display: flex; flex-direction: column; gap: 14px; }
+    .goal-item {}
+    .goal-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.82rem; }
+    .goal-header strong { color: var(--navy); }
+    .goal-header span { color: var(--gray); font-weight: 700; }
+    .goal-track {
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .goal-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+
+    /* ---- Responsive overrides ---- */
+    @media (max-width: 768px) {
+      .achievement-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .achievement-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="dashboard-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><img src="../images/logo.jpeg" alt="UTOL Schools Logo" /></div>
+      <div class="sidebar-brand"><strong>UTOL Schools</strong><span>Student Portal</span></div>
+    </div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">AO</div>
+      <div class="sidebar-user-info"><strong>Amara Osei</strong><span>Primary 4A</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Home</div>
+      <a href="student-dashboard.html" class="active"><span class="nav-icon">&#127968;</span>My Dashboard</a>
+      <div class="sidebar-section-label">Learning</div>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="my-subjects"><span class="nav-icon">&#128218;</span>My Subjects</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="my-timetable"><span class="nav-icon">&#128197;</span>My Timetable</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="assignments"><span class="nav-icon">&#128203;</span>Assignments <span class="nav-badge">2</span></a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="resources-notes"><span class="nav-icon">&#128196;</span>Resources &amp; Notes</a>
+      <div class="sidebar-section-label">Progress</div>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="my-grades"><span class="nav-icon">&#128200;</span>My Grades</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="my-attendance"><span class="nav-icon">&#9989;</span>My Attendance</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="achievements"><span class="nav-icon">&#127942;</span>Achievements</a>
+      <div class="sidebar-section-label">School</div>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="messages"><span class="nav-icon">&#128140;</span>Messages <span class="nav-badge">3</span></a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="announcements"><span class="nav-icon">&#128276;</span>Announcements</a>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="clubs-activities"><span class="nav-icon">&#9917;</span>Clubs &amp; Activities</a>
+      <div class="sidebar-section-label">Account</div>
+      <a href="javascript:void(0)" class="nav-coming-soon" onclick="navClick(this)" data-section="my-profile"><span class="nav-icon">&#128100;</span>My Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="../index.html" class="sidebar-visit-link">&#127968; Visit School Website</a>
+      <button class="sidebar-logout" onclick="UTOL.signOut()">&#128682; Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="dashboard-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" id="sidebarToggle">&#9776;</button>
+        <div class="topbar-title"><h1>My Dashboard</h1><p>Primary 4A &nbsp;|&nbsp; Term 2, 2025</p></div>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-icon-btn" title="Notifications">&#128276;<span class="notif-dot"></span></button>
+        <button class="topbar-icon-btn" title="Messages">&#128140;</button>
+        <div class="topbar-profile">
+          <div class="topbar-avatar">AO</div>
+          <span>Amara</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+
+      <!-- ===== WELCOME BANNER ===== -->
+      <div class="welcome-banner" style="align-items:flex-start;gap:0;padding:28px 32px 24px;">
+        <div style="flex:1;">
+          <h2>Good Morning, Amara! &#127774;</h2>
+          <p style="margin-top:4px;">You have <strong style="color:var(--yellow);">2 assignments</strong> due this week. Keep up the great work!</p>
+          <!-- streak -->
+          <div class="streak-badge"><span class="streak-fire">&#128293;</span> 7-day study streak — keep it going!</div>
+          <!-- term progress -->
+          <div class="term-progress-wrap" style="max-width:340px;margin-top:14px;">
+            <div class="term-progress-label"><span>Term 2 Progress</span><span>Week 8 of 13</span></div>
+            <div class="term-progress-track"><div class="term-progress-fill"></div></div>
+          </div>
+          <!-- today's subjects -->
+          <div class="subject-pills">
+            <span class="subject-pill"><span class="sp-dot" style="background:var(--yellow);"></span>English</span>
+            <span class="subject-pill"><span class="sp-dot" style="background:#60a5fa;"></span>Maths</span>
+            <span class="subject-pill"><span class="sp-dot" style="background:var(--green);"></span>Science</span>
+            <span class="subject-pill"><span class="sp-dot" style="background:#a855f7;"></span>ICT</span>
+            <span class="subject-pill"><span class="sp-dot" style="background:#f97316;"></span>Creative Arts</span>
+          </div>
+        </div>
+        <div class="banner-emoji" style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div style="font-size:3.5rem;">&#127891;</div>
+          <div style="font-size:0.72rem;opacity:0.65;font-weight:700;text-align:center;white-space:nowrap;">Friday, 4 Apr 2025</div>
+        </div>
+      </div>
+
+      <!-- ===== STATS GRID ===== -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon si-yellow">&#128203;</div>
+          <div class="stat-info"><div class="stat-val">2</div><div class="stat-label">Assignments Due</div></div>
+          <span class="stat-change change-down">This week</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-green">&#9989;</div>
+          <div class="stat-info"><div class="stat-val">96%</div><div class="stat-label">Attendance Rate</div></div>
+          <span class="stat-change change-up">&#8593; Excellent</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-navy">&#127942;</div>
+          <div class="stat-info"><div class="stat-val">87</div><div class="stat-label">Term Average</div></div>
+          <span class="stat-change change-up">&#8593; +3pts</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(168,85,247,0.1);">&#9917;</div>
+          <div class="stat-info"><div class="stat-val">3</div><div class="stat-label">Clubs Joined</div></div>
+          <span class="stat-change change-up">Active</span>
+        </div>
+      </div>
+
+      <!-- ===== ROW 1: TIMETABLE + GRADES/ACTIONS ===== -->
+      <div class="content-grid">
+        <!-- TODAY'S TIMETABLE -->
+        <div class="dash-card">
+          <div class="dash-card-header"><h3>&#128197; Today's Timetable – Friday</h3><a href="#">Full Timetable</a></div>
+          <div class="dash-card-body">
+            <div class="schedule-list">
+              <div class="schedule-item" style="border-left:3px solid #e5e7eb;border-radius:0 10px 10px 0;"><span class="schedule-time">7:30–8:00</span><div class="schedule-color" style="background:#e5e7eb"></div><div class="schedule-info"><strong>Assembly &amp; Morning Routine</strong><span>Main Hall</span></div></div>
+              <div class="schedule-item now-class" style="border-left:3px solid var(--navy);border-radius:0 10px 10px 0;background:#eef0ff;"><span class="schedule-time" style="color:var(--navy)">8:00–9:00</span><div class="schedule-color" style="background:var(--navy)"></div><div class="schedule-info"><strong>English Language</strong><span>Mrs. Chukwu &nbsp;&#128310; NOW</span></div><span class="schedule-room">Rm 4A</span></div>
+              <div class="schedule-item"><span class="schedule-time">9:00–10:00</span><div class="schedule-color" style="background:var(--yellow)"></div><div class="schedule-info"><strong>Mathematics</strong><span>Mr. Balogun</span></div><span class="schedule-room">Rm 4A</span></div>
+              <div class="schedule-item"><span class="schedule-time">10:00–10:20</span><div class="schedule-color" style="background:#e5e7eb"></div><div class="schedule-info"><strong>Break Time</strong><span>Playground</span></div></div>
+              <div class="schedule-item"><span class="schedule-time">10:20–11:20</span><div class="schedule-color" style="background:var(--green)"></div><div class="schedule-info"><strong>Basic Science</strong><span>Mrs. Eze</span></div><span class="schedule-room">Lab 2</span></div>
+              <div class="schedule-item"><span class="schedule-time">11:20–12:20</span><div class="schedule-color" style="background:#7b1fa2"></div><div class="schedule-info"><strong>ICT &amp; Coding</strong><span>Mr. Mohammed</span></div><span class="schedule-room">ICT Lab</span></div>
+              <div class="schedule-item"><span class="schedule-time">12:20–1:00</span><div class="schedule-color" style="background:#e5e7eb"></div><div class="schedule-info"><strong>Lunch Break</strong><span>Cafeteria</span></div></div>
+              <div class="schedule-item"><span class="schedule-time">1:00–2:00</span><div class="schedule-color" style="background:#0277bd"></div><div class="schedule-info"><strong>Social Studies</strong><span>Mrs. Taiwo</span></div><span class="schedule-room">Rm 4A</span></div>
+              <div class="schedule-item"><span class="schedule-time">2:00–3:00</span><div class="schedule-color" style="background:#f57c00"></div><div class="schedule-info"><strong>Creative Arts</strong><span>Mr. Okafor</span></div><span class="schedule-room">Art Room</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <!-- MY GRADES -->
+          <div class="dash-card">
+            <div class="dash-card-header"><h3>&#128200; My Grades – Term 2</h3><a href="#">Full Report</a></div>
+            <div class="dash-card-body">
+              <div class="grade-list">
+                <div class="grade-item"><span class="grade-subject">English</span><div class="grade-bar-wrap"><div class="grade-bar" style="width:88%;background:var(--green)"></div></div><span class="grade-score" style="color:var(--green)">88</span></div>
+                <div class="grade-item"><span class="grade-subject">Maths</span><div class="grade-bar-wrap"><div class="grade-bar" style="width:92%;background:var(--navy)"></div></div><span class="grade-score" style="color:var(--navy)">92</span></div>
+                <div class="grade-item"><span class="grade-subject">Science</span><div class="grade-bar-wrap"><div class="grade-bar" style="width:79%;background:#f59e0b"></div></div><span class="grade-score" style="color:#f59e0b">79</span></div>
+                <div class="grade-item"><span class="grade-subject">ICT</span><div class="grade-bar-wrap"><div class="grade-bar" style="width:95%;background:var(--navy)"></div></div><span class="grade-score" style="color:var(--navy)">95</span></div>
+                <div class="grade-item"><span class="grade-subject">Social Studies</span><div class="grade-bar-wrap"><div class="grade-bar" style="width:85%;background:var(--green)"></div></div><span class="grade-score" style="color:var(--green)">85</span></div>
+              </div>
+              <div style="margin-top:14px;padding:10px 14px;background:rgba(46,125,50,0.07);border-radius:8px;display:flex;justify-content:space-between;font-size:0.78rem;">
+                <span>&#127942; <strong>Class Position:</strong> 1st</span>
+                <span>&#128200; <strong>Avg:</strong> 87.8 / 100</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- QUICK ACTIONS -->
+          <div class="dash-card">
+            <div class="dash-card-header"><h3>&#9889; Quick Actions</h3></div>
+            <div class="dash-card-body">
+              <div class="quick-actions">
+                <button class="quick-action-btn"><span>&#128218;</span>My Notes</button>
+                <button class="quick-action-btn"><span>&#128203;</span>Assignments</button>
+                <button class="quick-action-btn"><span>&#128140;</span>Messages</button>
+                <button class="quick-action-btn"><span>&#127942;</span>Awards</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ROW 2: MINI CALENDAR + ANNOUNCEMENTS ===== -->
+      <div class="content-grid" style="grid-template-columns:1fr 1.5fr;">
+        <!-- MINI CALENDAR -->
+        <div class="dash-card">
+          <div class="dash-card-header"><h3>&#128197; School Calendar</h3><a href="#">View Events</a></div>
+          <div class="dash-card-body">
+            <div class="mini-calendar">
+              <div class="cal-header">
+                <button class="cal-nav cal-prev">&#8249;</button>
+                <span class="cal-month">April 2025</span>
+                <button class="cal-nav cal-next">&#8250;</button>
+              </div>
+              <div class="cal-grid">
+                <div class="cal-day-name">Su</div>
+                <div class="cal-day-name">Mo</div>
+                <div class="cal-day-name">Tu</div>
+                <div class="cal-day-name">We</div>
+                <div class="cal-day-name">Th</div>
+                <div class="cal-day-name">Fr</div>
+                <div class="cal-day-name">Sa</div>
+                <!-- 35 day cells populated by JS -->
+                <div class="cal-day"></div><div class="cal-day"></div><div class="cal-day"></div>
+                <div class="cal-day"></div><div class="cal-day"></div><div class="cal-day"></div>
+                <div class="cal-day"></div><div class="cal-day"></div><div class="cal-day"></div>
+                <div class="cal-day"></div><div class="cal-day"></div><div class="cal-day"></div>
+                <div class="cal-day"></div><div class="cal-day"></div><div class="cal-day"></div>
+                <div class="cal-day"></div><div class="cal-day"></div><div class="cal-day"></div>
+                <div class="cal-day"></div><div class="cal-day"></div><div class="cal-day"></div>
+                <div class="cal-day"></div><div class="cal-day"></div><div class="cal-day"></div>
+                <div class="cal-day"></div><div class="cal-day"></div><div class="cal-day"></div>
+                <div class="cal-day"></div><div class="cal-day"></div><div class="cal-day"></div>
+                <div class="cal-day"></div><div class="cal-day"></div><div class="cal-day"></div>
+                <div class="cal-day"></div><div class="cal-day"></div>
+              </div>
+            </div>
+            <!-- Upcoming events list below calendar -->
+            <div style="margin-top:16px;border-top:1px solid #f0f0f0;padding-top:14px;">
+              <div style="font-size:0.72rem;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Upcoming Events</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div style="width:32px;height:32px;background:rgba(239,68,68,0.1);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:0.8rem;color:#ef4444;flex-shrink:0;">7</div>
+                  <div><strong style="font-size:0.8rem;display:block;">Maths Assignment Due</strong><span style="font-size:0.72rem;color:var(--gray);">Fractions Worksheet</span></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div style="width:32px;height:32px;background:rgba(244,199,10,0.15);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:0.8rem;color:#a07800;flex-shrink:0;">25</div>
+                  <div><strong style="font-size:0.8rem;display:block;">Annual Sports Day</strong><span style="font-size:0.72rem;color:var(--gray);">All campus, 8am</span></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div style="width:32px;height:32px;background:rgba(46,125,50,0.1);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:0.8rem;color:var(--green);flex-shrink:0;">15</div>
+                  <div><strong style="font-size:0.8rem;display:block;">STEM Fair 2025</strong><span style="font-size:0.72rem;color:var(--gray);">May 15 – Science Block</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ANNOUNCEMENTS -->
+        <div class="dash-card">
+          <div class="dash-card-header"><h3>&#128276; School Announcements</h3><a href="#">View All</a></div>
+          <div class="dash-card-body">
+            <div class="notice-list">
+              <div class="notice-item">
+                <div class="notice-dot" style="background:#ef4444"></div>
+                <div class="notice-info">
+                  <strong>Term 2 Exam Timetable Released</strong>
+                  <p>Exams begin Monday 6th June. Check the attached timetable and prepare your revision schedule early.</p>
+                  <time>Today, 8:00am</time>
+                </div>
+              </div>
+              <div class="notice-item">
+                <div class="notice-dot" style="background:var(--yellow)"></div>
+                <div class="notice-info">
+                  <strong>&#127942; Congratulations – Robotics Club!</strong>
+                  <p>Our robotics team (including Amara!) placed 2nd at the National Junior Robotics Championship. Well done!</p>
+                  <time>2 days ago</time>
+                </div>
+              </div>
+              <div class="notice-item">
+                <div class="notice-dot" style="background:var(--green)"></div>
+                <div class="notice-info">
+                  <strong>Annual Sports Day – April 25th</strong>
+                  <p>Athletes, report to the sports office by Monday to confirm your events. Parents are welcome to attend!</p>
+                  <time>3 days ago</time>
+                </div>
+              </div>
+              <div class="notice-item">
+                <div class="notice-dot" style="background:var(--navy)"></div>
+                <div class="notice-info">
+                  <strong>New Digital Library Now Open</strong>
+                  <p>The digital library and coding lab are now open during break and lunch. Bring your student ID card.</p>
+                  <time>1 week ago</time>
+                </div>
+              </div>
+              <div class="notice-item">
+                <div class="notice-dot" style="background:#7b1fa2"></div>
+                <div class="notice-info">
+                  <strong>STEM Fair 2025 – Project Submission</strong>
+                  <p>P3–P6 students must submit their STEM Fair project titles to their class teacher by April 18th.</p>
+                  <time>1 week ago</time>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ASSIGNMENTS TABLE ===== -->
+      <div class="dash-card" style="margin-bottom:24px;">
+        <div class="dash-card-header"><h3>&#128203; My Assignments</h3><a href="#">View All</a></div>
+        <div class="dash-card-body" style="overflow-x:auto;">
+          <table class="dash-table">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Assignment Title</th>
+                <th>Teacher</th>
+                <th>Due Date</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Mathematics</td>
+                <td>Fractions Worksheet – Chapter 7</td>
+                <td>Mr. Balogun</td>
+                <td>Apr 7, 2025</td>
+                <td><span class="priority-dot priority-high"></span>High</td>
+                <td><span class="badge badge-red">Due Soon</span></td>
+                <td><a href="#" style="font-size:0.8rem;font-weight:700;color:var(--navy)">View</a></td>
+              </tr>
+              <tr>
+                <td>English</td>
+                <td>Book Review – "Things Fall Apart"</td>
+                <td>Mrs. Chukwu</td>
+                <td>Apr 10, 2025</td>
+                <td><span class="priority-dot priority-medium"></span>Medium</td>
+                <td><span class="badge badge-yellow">In Progress</span></td>
+                <td><a href="#" style="font-size:0.8rem;font-weight:700;color:var(--navy)">View</a></td>
+              </tr>
+              <tr>
+                <td>Basic Science</td>
+                <td>Ecosystem Poster Project</td>
+                <td>Mrs. Eze</td>
+                <td>Apr 14, 2025</td>
+                <td><span class="priority-dot priority-medium"></span>Medium</td>
+                <td><span class="badge badge-blue">Not Started</span></td>
+                <td><a href="#" style="font-size:0.8rem;font-weight:700;color:var(--navy)">View</a></td>
+              </tr>
+              <tr>
+                <td>ICT</td>
+                <td>Scratch Programming – Animation</td>
+                <td>Mr. Mohammed</td>
+                <td>Apr 18, 2025</td>
+                <td><span class="priority-dot priority-low"></span>Low</td>
+                <td><span class="badge badge-green">Submitted</span></td>
+                <td><a href="#" style="font-size:0.8rem;font-weight:700;color:var(--navy)">View</a></td>
+              </tr>
+              <tr>
+                <td>Social Studies</td>
+                <td>Map of Nigeria – Capitals &amp; States</td>
+                <td>Mrs. Taiwo</td>
+                <td>Apr 22, 2025</td>
+                <td><span class="priority-dot priority-low"></span>Low</td>
+                <td><span class="badge badge-blue">Not Started</span></td>
+                <td><a href="#" style="font-size:0.8rem;font-weight:700;color:var(--navy)">View</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== ROW 3: MESSAGES + CLUBS + RESOURCES ===== -->
+      <div class="content-grid-3" style="margin-bottom:24px;">
+
+        <!-- TEACHER MESSAGES -->
+        <div class="dash-card">
+          <div class="dash-card-header"><h3>&#128140; Messages</h3><a href="#">New Message</a></div>
+          <div class="dash-card-body">
+            <div>
+              <div class="msg-item msg-unread">
+                <div class="msg-avatar" style="background:var(--navy);">EC</div>
+                <div class="msg-body">
+                  <div class="msg-header">
+                    <span class="msg-name">Mrs. Chukwu</span>
+                    <span class="msg-time">Today 9:30am</span>
+                  </div>
+                  <p class="msg-preview">Amara, your book review outline is excellent! Please add a conclusion paragraph...</p>
+                </div>
+              </div>
+              <div class="msg-item msg-unread">
+                <div class="msg-avatar" style="background:var(--green);">YM</div>
+                <div class="msg-body">
+                  <div class="msg-header">
+                    <span class="msg-name">Mr. Mohammed</span>
+                    <span class="msg-time">Yesterday</span>
+                  </div>
+                  <p class="msg-preview">Great work on your Scratch animation! You've been selected for the STEM Fair...</p>
+                </div>
+              </div>
+              <div class="msg-item msg-unread">
+                <div class="msg-avatar" style="background:#7b1fa2;">OB</div>
+                <div class="msg-body">
+                  <div class="msg-header">
+                    <span class="msg-name">Mr. Balogun</span>
+                    <span class="msg-time">2 days ago</span>
+                  </div>
+                  <p class="msg-preview">Don't forget the fractions worksheet is due Monday. Let me know if you need help...</p>
+                </div>
+              </div>
+              <div class="msg-item">
+                <div class="msg-avatar" style="background:#0277bd;">NE</div>
+                <div class="msg-body">
+                  <div class="msg-header">
+                    <span class="msg-name">Mrs. Eze</span>
+                    <span class="msg-time">3 days ago</span>
+                  </div>
+                  <p class="msg-preview">Science project topic approved ✅ – Rainforest Ecosystem is a great choice!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CLUBS & ACTIVITIES -->
+        <div class="dash-card">
+          <div class="dash-card-header"><h3>&#9917; My Clubs &amp; Activities</h3><a href="#">Explore More</a></div>
+          <div class="dash-card-body">
+            <div class="club-list">
+              <div class="club-item">
+                <span class="club-icon">&#129302;</span>
+                <div class="club-info">
+                  <strong>Robotics &amp; Coding Club</strong>
+                  <span>ICT Lab &nbsp;|&nbsp; Mr. Mohammed</span>
+                </div>
+                <span class="club-day">Mon &amp; Wed</span>
+              </div>
+              <div class="club-item">
+                <span class="club-icon">&#127939;</span>
+                <div class="club-info">
+                  <strong>Athletics Team</strong>
+                  <span>Sports Field &nbsp;|&nbsp; Coach Adeyemi</span>
+                </div>
+                <span class="club-day">Tue &amp; Thu</span>
+              </div>
+              <div class="club-item">
+                <span class="club-icon">&#128218;</span>
+                <div class="club-info">
+                  <strong>Reading &amp; Debate Club</strong>
+                  <span>Library &nbsp;|&nbsp; Mrs. Chukwu</span>
+                </div>
+                <span class="club-day">Friday</span>
+              </div>
+            </div>
+            <!-- Term Goals -->
+            <div style="margin-top:18px;padding-top:14px;border-top:1px solid #f0f0f0;">
+              <div style="font-size:0.72rem;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">My Term Goals</div>
+              <div class="goal-list">
+                <div class="goal-item">
+                  <div class="goal-header"><strong>Score 90+ in Maths</strong><span>92%</span></div>
+                  <div class="goal-track"><div class="goal-fill" style="width:92%;background:var(--navy);"></div></div>
+                </div>
+                <div class="goal-item">
+                  <div class="goal-header"><strong>Perfect Attendance</strong><span>96%</span></div>
+                  <div class="goal-track"><div class="goal-fill" style="width:96%;background:var(--green);"></div></div>
+                </div>
+                <div class="goal-item">
+                  <div class="goal-header"><strong>Complete STEM Fair Project</strong><span>40%</span></div>
+                  <div class="goal-track"><div class="goal-fill" style="width:40%;background:var(--yellow);"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STUDY RESOURCES -->
+        <div class="dash-card">
+          <div class="dash-card-header"><h3>&#128196; Study Resources</h3><a href="#">Library</a></div>
+          <div class="dash-card-body">
+            <div class="resource-list">
+              <a href="#" class="resource-item">
+                <div class="resource-icon" style="background:rgba(3,4,94,0.08);">&#128218;</div>
+                <div class="resource-info"><strong>English – Grammar Notes</strong><span>Mrs. Chukwu &nbsp;|&nbsp; PDF &nbsp;|&nbsp; 2.1MB</span></div>
+                <span class="resource-arrow">&#8250;</span>
+              </a>
+              <a href="#" class="resource-item">
+                <div class="resource-icon" style="background:rgba(244,199,10,0.15);">&#128202;</div>
+                <div class="resource-info"><strong>Maths – Fractions Practice</strong><span>Mr. Balogun &nbsp;|&nbsp; PDF &nbsp;|&nbsp; 1.4MB</span></div>
+                <span class="resource-arrow">&#8250;</span>
+              </a>
+              <a href="#" class="resource-item">
+                <div class="resource-icon" style="background:rgba(46,125,50,0.1);">&#129514;</div>
+                <div class="resource-info"><strong>Science – Ecosystem Guide</strong><span>Mrs. Eze &nbsp;|&nbsp; PDF &nbsp;|&nbsp; 3.8MB</span></div>
+                <span class="resource-arrow">&#8250;</span>
+              </a>
+              <a href="#" class="resource-item">
+                <div class="resource-icon" style="background:rgba(123,31,162,0.08);">&#128187;</div>
+                <div class="resource-info"><strong>ICT – Scratch Beginner Guide</strong><span>Mr. Mohammed &nbsp;|&nbsp; PDF &nbsp;|&nbsp; 5.2MB</span></div>
+                <span class="resource-arrow">&#8250;</span>
+              </a>
+              <a href="#" class="resource-item">
+                <div class="resource-icon" style="background:rgba(2,119,189,0.08);">&#127758;</div>
+                <div class="resource-info"><strong>Social Studies – Map &amp; States</strong><span>Mrs. Taiwo &nbsp;|&nbsp; PDF &nbsp;|&nbsp; 1.9MB</span></div>
+                <span class="resource-arrow">&#8250;</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ACHIEVEMENTS ===== -->
+      <div class="dash-card" style="margin-bottom:24px;">
+        <div class="dash-card-header">
+          <h3>&#127942; My Achievements</h3>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:0.78rem;color:var(--gray);"><strong style="color:var(--navy);">8</strong> / 12 earned</span>
+            <a href="#">View All</a>
+          </div>
+        </div>
+        <div class="dash-card-body">
+          <div class="achievement-grid">
+            <div class="achievement-card" style="background:rgba(244,199,10,0.1);">
+              <div class="achievement-emoji">&#127942;</div>
+              <strong>Top Student</strong>
+              <span>Term 1, 2025</span>
+            </div>
+            <div class="achievement-card" style="background:rgba(46,125,50,0.08);">
+              <div class="achievement-emoji">&#9917;</div>
+              <strong>Best Athlete</strong>
+              <span>Sports Day 2024</span>
+            </div>
+            <div class="achievement-card" style="background:rgba(3,4,94,0.06);">
+              <div class="achievement-emoji">&#128214;</div>
+              <strong>Perfect Attendance</strong>
+              <span>Term 1, 2025</span>
+            </div>
+            <div class="achievement-card" style="background:rgba(123,31,162,0.08);">
+              <div class="achievement-emoji">&#129302;</div>
+              <strong>Robotics Champion</strong>
+              <span>National, 2024</span>
+            </div>
+            <div class="achievement-card" style="background:rgba(244,199,10,0.1);">
+              <div class="achievement-emoji">&#128293;</div>
+              <strong>7-Day Streak</strong>
+              <span>Active now</span>
+            </div>
+            <div class="achievement-card" style="background:rgba(2,119,189,0.07);">
+              <div class="achievement-emoji">&#128218;</div>
+              <strong>Bookworm</strong>
+              <span>10 books read</span>
+            </div>
+            <div class="achievement-card locked" style="background:rgba(107,114,128,0.06);">
+              <div class="achievement-emoji">&#127808;</div>
+              <strong>STEM Fair Winner</strong>
+              <span>Complete STEM Fair</span>
+            </div>
+            <div class="achievement-card locked" style="background:rgba(107,114,128,0.06);">
+              <div class="achievement-emoji">&#127775;</div>
+              <strong>Top of Year</strong>
+              <span>End of year result</span>
+            </div>
+          </div>
+          <div style="margin-top:16px;padding:12px 16px;background:rgba(244,199,10,0.08);border-radius:10px;font-size:0.8rem;color:#a07800;display:flex;align-items:center;gap:8px;">
+            &#128161; <span>Complete the <strong>STEM Fair project</strong> to unlock the "STEM Fair Winner" badge!</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end dashboard-body -->
+  </main>
+</div>
+
+<script src="../js/supabase.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/portal-nav.js"></script>
+<script>
+/* ─ Portal sections ─ */
+window.PORTAL_SECTIONS = (function(h){
+var btn = h.btn, badge = h.badge, stats = h.stats, table = h.table,
+    divider = h.divider, card = h.card, field = h.field, row = h.row,
+    selectField = h.selectField, textarea = h.textarea;
+return {
+
+/* ── My Subjects ── */
+'my-subjects': { title:'&#128218; My Subjects',
+  html: stats([
+    {val:'8',label:'Total Subjects',bg:'#e8eaf6',color:'var(--navy)'},
+    {val:'A',label:'Overall Grade',bg:'#dcfce7',color:'#15803d'},
+    {val:'82%',label:'Avg Score',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'Term 2',label:'Current Term',bg:'#fef9c3',color:'#a07800'},
+  ])+divider('Subject Performance')+
+  table(['Subject','Teacher','Score','Grade','Status'],[
+    ['Mathematics','Mr. Owusu','91%',badge('A','green'),badge('Excellent','green')],
+    ['English Language','Mrs. Addo','87%',badge('A','green'),badge('Excellent','green')],
+    ['Integrated Science','Mr. Mensah','83%',badge('A','green'),badge('Good','blue')],
+    ['Social Studies','Mrs. Boateng','79%',badge('B+','blue'),badge('Good','blue')],
+    ['Ghanaian Language','Mr. Asante','76%',badge('B','blue'),badge('Good','blue')],
+    ['Religious & Moral Ed.','Mrs. Osei','88%',badge('A','green'),badge('Excellent','green')],
+    ['Creative Arts','Mr. Darko','94%',badge('A+','green'),badge('Outstanding','purple')],
+    ['Computing','Mrs. Acheampong','85%',badge('A','green'),badge('Good','blue')],
+  ])+row([btn('Download Report','pnl-btn-navy',"showToast('Subject report downloaded.','success')")])
+},
+
+/* ── My Timetable ── */
+'my-timetable': { title:'&#128197; My Timetable',
+  html: divider('Week Timetable – P4A')+
+  table(['Day','Period 1','Period 2','Period 3','Period 4','Period 5'],[
+    ['Monday','Mathematics','English','Social Studies','Computing','Creative Arts'],
+    ['Tuesday','Integrated Sci.','Mathematics','English','Ghanaian Lang.','RME'],
+    ['Wednesday','English','Social Studies','Mathematics','Integrated Sci.','Sports'],
+    ['Thursday','Computing','English','Mathematics','Creative Arts','Library'],
+    ['Friday','RME','Ghanaian Lang.','English','Mathematics','Integrated Sci.'],
+  ])+divider('Today – Friday')+
+  card(
+    '<div style="font-size:0.85rem;color:var(--navy);">'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
+    '<div style="padding:10px;background:#f0f4ff;border-radius:8px;"><strong>Period 1 · 7:30</strong><br/>RME – Mrs. Osei<br/><span style="color:#6b7280;font-size:0.78rem;">Room 4A</span></div>'+
+    '<div style="padding:10px;background:#f0f4ff;border-radius:8px;"><strong>Period 2 · 8:30</strong><br/>Ghanaian Language – Mr. Asante<br/><span style="color:#6b7280;font-size:0.78rem;">Room 4A</span></div>'+
+    '<div style="padding:10px;background:#dcfce7;border-radius:8px;border:2px solid #86efac;"><strong>Period 3 · 9:30 ← Now</strong><br/>English – Mrs. Addo<br/><span style="color:#6b7280;font-size:0.78rem;">Room 4A</span></div>'+
+    '<div style="padding:10px;background:#f0f4ff;border-radius:8px;"><strong>Period 4 · 10:45</strong><br/>Mathematics – Mr. Owusu<br/><span style="color:#6b7280;font-size:0.78rem;">Room 4A</span></div>'+
+    '<div style="padding:10px;background:#f0f4ff;border-radius:8px;"><strong>Period 5 · 11:45</strong><br/>Integrated Science – Mr. Mensah<br/><span style="color:#6b7280;font-size:0.78rem;">Lab 1</span></div>'+
+    '</div></div>'
+  )
+},
+
+/* ── Assignments ── */
+'assignments': { title:'&#128203; My Assignments',
+  html: stats([
+    {val:'5',label:'Total',bg:'#e8eaf6',color:'var(--navy)'},
+    {val:'2',label:'Pending',bg:'#fee2e2',color:'#dc2626'},
+    {val:'2',label:'Submitted',bg:'#dcfce7',color:'#15803d'},
+    {val:'1',label:'Graded',bg:'#dbeafe',color:'#1d4ed8'},
+  ])+divider('Pending Assignments')+
+  table(['Subject','Title','Due Date','Status','Action'],[
+    ['Mathematics','Fractions Worksheet – Chapter 7','Apr 8',badge('Due Soon','red'),btn('Submit','pnl-btn-green',"showToast('Assignment submission opened.','info')")],
+    ['English','Comprehension – The Lion King','Apr 10',badge('Pending','yellow'),btn('Submit','pnl-btn-green',"showToast('Assignment submission opened.','info')")],
+  ])+divider('Submitted / Graded')+
+  table(['Subject','Title','Submitted','Score','Status'],[
+    ['Integrated Science','Water Cycle Diagram','Apr 2','18/20',badge('Graded','blue')],
+    ['Social Studies','Map of Ghana Essay','Apr 1','—',badge('Submitted','green')],
+    ['Creative Arts','Kente Pattern Design','Mar 28','—',badge('Submitted','green')],
+  ])+row([btn('Submit Assignment','pnl-btn-green',"showToast('Assignment upload form opened.','info')")])
+},
+
+/* ── Resources & Notes ── */
+'resources-notes': { title:'&#128196; Resources &amp; Notes',
+  html: stats([
+    {val:'24',label:'Study Files',bg:'#e8eaf6',color:'var(--navy)'},
+    {val:'8',label:'Subjects',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'6',label:'New This Week',bg:'#dcfce7',color:'#15803d'},
+    {val:'3',label:'Videos',bg:'#f3e8ff',color:'#7c3aed'},
+  ])+divider('Recent Resources')+
+  table(['Subject','Title','Type','Uploaded','Action'],[
+    ['Mathematics','Chapter 7 – Fractions Notes','PDF','Apr 4',btn('Download','pnl-btn-navy',"showToast('File downloaded.','success')")],
+    ['English','Comprehension Strategies','PDF','Apr 3',btn('Download','pnl-btn-navy',"showToast('File downloaded.','success')")],
+    ['Integrated Science','The Water Cycle – Video','Video','Apr 2',btn('Watch','pnl-btn-navy',"showToast('Video opened.','info')")],
+    ['Social Studies','Ghana Map – Full Annotated','PDF','Apr 1',btn('Download','pnl-btn-navy',"showToast('File downloaded.','success')")],
+    ['Computing','Intro to Scratch Slides','PPT','Mar 30',btn('Download','pnl-btn-navy',"showToast('File downloaded.','success')")],
+    ['Creative Arts','Kente Patterns Reference','Image','Mar 28',btn('View','pnl-btn-navy',"showToast('Image opened.','info')")],
+  ])+row([btn('Browse Library','pnl-btn-navy',"showToast('School library opened.','info')")])
+},
+
+/* ── My Grades ── */
+'my-grades': { title:'&#128200; My Grades – Term 2',
+  html: stats([
+    {val:'A',label:'Overall Grade',bg:'#dcfce7',color:'#15803d'},
+    {val:'82.9%',label:'Average Score',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'3rd',label:'Class Position',bg:'#fef9c3',color:'#a07800'},
+    {val:'Top 10%',label:'School Rank',bg:'#dcfce7',color:'#15803d'},
+  ])+divider('Subject Grades – Term 2')+
+  table(['Subject','Test 1','Test 2','Exam','Total','Grade'],[
+    ['Mathematics','18/20','19/20','55/60','92/100',badge('A+','green')],
+    ['English Language','17/20','18/20','52/60','87/100',badge('A','green')],
+    ['Integrated Science','16/20','17/20','50/60','83/100',badge('A','green')],
+    ['Social Studies','15/20','16/20','48/60','79/100',badge('B+','blue')],
+    ['Ghanaian Language','15/20','15/20','46/60','76/100',badge('B','blue')],
+    ['RME','17/20','18/20','53/60','88/100',badge('A','green')],
+    ['Creative Arts','19/20','19/20','56/60','94/100',badge('A+','green')],
+    ['Computing','17/20','17/20','51/60','85/100',badge('A','green')],
+  ])+row([btn('Download Report Card','pnl-btn-navy',"showToast('Report card downloaded.','success')")])
+},
+
+/* ── My Attendance ── */
+'my-attendance': { title:'&#9989; My Attendance',
+  html: stats([
+    {val:'94%',label:'Attendance Rate',bg:'#dcfce7',color:'#15803d'},
+    {val:'78',label:'Days Present',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'5',label:'Days Absent',bg:'#fee2e2',color:'#dc2626'},
+    {val:'2',label:'Days Late',bg:'#fef9c3',color:'#a07800'},
+  ])+divider('Attendance Log – This Month')+
+  table(['Date','Day','Status','Note'],[
+    ['Apr 6','Friday',badge('Present','green'),'—'],
+    ['Apr 5','Thursday',badge('Present','green'),'—'],
+    ['Apr 4','Wednesday',badge('Present','green'),'—'],
+    ['Apr 3','Tuesday',badge('Late','yellow'),'Arrived 8:05 AM'],
+    ['Apr 2','Monday',badge('Present','green'),'—'],
+    ['Mar 28','Friday',badge('Absent','red'),'Sick – Doctor note submitted'],
+    ['Mar 27','Thursday',badge('Present','green'),'—'],
+  ])+row([btn('Download Full Record','pnl-btn-navy',"showToast('Attendance record downloaded.','success')")])
+},
+
+/* ── Achievements ── */
+'achievements': { title:'&#127942; My Achievements',
+  html: stats([
+    {val:'8',label:'Badges Earned',bg:'#fef9c3',color:'#a07800'},
+    {val:'3rd',label:'Class Position',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'Top 10%',label:'School Rank',bg:'#dcfce7',color:'#15803d'},
+    {val:'Term 2',label:'Current Term',bg:'#e8eaf6',color:'var(--navy)'},
+  ])+divider('Badges &amp; Awards')+
+  card(
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'+
+    '<div style="text-align:center;padding:16px;background:#fef9c3;border-radius:10px;"><div style="font-size:2rem;">🏅</div><div style="font-weight:700;color:var(--navy);font-size:0.85rem;margin-top:6px;">Maths Star</div><div style="font-size:0.75rem;color:#6b7280;">Term 2 Top Score</div></div>'+
+    '<div style="text-align:center;padding:16px;background:#dcfce7;border-radius:10px;"><div style="font-size:2rem;">📚</div><div style="font-weight:700;color:var(--navy);font-size:0.85rem;margin-top:6px;">Bookworm</div><div style="font-size:0.75rem;color:#6b7280;">10 Books Read</div></div>'+
+    '<div style="text-align:center;padding:16px;background:#dbeafe;border-radius:10px;"><div style="font-size:2rem;">🎨</div><div style="font-weight:700;color:var(--navy);font-size:0.85rem;margin-top:6px;">Creative Mind</div><div style="font-size:0.75rem;color:#6b7280;">Arts Excellence</div></div>'+
+    '<div style="text-align:center;padding:16px;background:#f3e8ff;border-radius:10px;"><div style="font-size:2rem;">🤝</div><div style="font-weight:700;color:var(--navy);font-size:0.85rem;margin-top:6px;">Team Player</div><div style="font-size:0.75rem;color:#6b7280;">Club Leadership</div></div>'+
+    '</div>'
+  )+divider('Academic Certificates')+
+  table(['Certificate','Term','Issued','Action'],[
+    ['Term 1 Report Card','Term 1 2024/25','Feb 2025',btn('Download','pnl-btn-navy',"showToast('Certificate downloaded.','success')")],
+    ['Class 3rd Position','Term 2 2024/25','Pending',btn('Preview','pnl-btn-navy',"showToast('Results not yet published.','info')")],
+  ])
+},
+
+/* ── Messages ── */
+'messages': { title:'&#128140; Messages',
+  html: stats([
+    {val:'3',label:'Unread',bg:'#fee2e2',color:'#dc2626'},
+    {val:'12',label:'Total',bg:'#e8eaf6',color:'var(--navy)'},
+    {val:'4',label:'Teachers',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'1',label:'Admin',bg:'#f3e8ff',color:'#7c3aed'},
+  ])+divider('Inbox')+
+  table(['From','Subject','Date','Status'],[
+    ['Mr. Owusu','Maths Assignment – Submission Deadline','Apr 5',badge('Unread','red')],
+    ['Mrs. Addo','English Comprehension Feedback','Apr 4',badge('Unread','red')],
+    ['Admin Office','Mid-Term Break Schedule','Apr 3',badge('Unread','red')],
+    ['Mr. Mensah','Science Lab Safety Rules','Apr 2',badge('Read','gray')],
+    ['Mrs. Boateng','Social Studies Project Guidelines','Mar 30',badge('Read','gray')],
+  ])+divider('Send Message')+
+  selectField('To',['Mr. Owusu (Mathematics)','Mrs. Addo (English)','Mr. Mensah (Science)','Admin Office'])+
+  field('Subject','text','Message subject')+
+  textarea('Message','Write your message here...',4)+
+  row([btn('Send Message','pnl-btn-navy',"showToast('Message sent successfully.','success')")])
+},
+
+/* ── Clubs & Activities ── */
+'clubs-activities': { title:'&#9917; Clubs &amp; Activities',
+  html: stats([
+    {val:'2',label:'My Clubs',bg:'#e8eaf6',color:'var(--navy)'},
+    {val:'12',label:'Clubs Available',bg:'#dbeafe',color:'#1d4ed8'},
+    {val:'Fri 3PM',label:'Next Activity',bg:'#dcfce7',color:'#15803d'},
+    {val:'3',label:'Events This Term',bg:'#fef9c3',color:'#a07800'},
+  ])+divider('My Clubs')+
+  card(
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;"><div style="font-size:2rem;">♟️</div><div><div style="font-weight:700;color:var(--navy);">Chess Club</div><div style="font-size:0.8rem;color:#6b7280;">Mr. Darko · Fridays 3:00 PM · Room 12</div></div>'+badge('Member','green')+'</div>'+
+    '<div style="display:flex;align-items:center;gap:12px;"><div style="font-size:2rem;">🎨</div><div><div style="font-weight:700;color:var(--navy);">Art & Craft Club</div><div style="font-size:0.8rem;color:#6b7280;">Mrs. Osei · Wednesdays 3:00 PM · Art Room</div></div>'+badge('Member','green')+'</div>'
+  )+divider('Join a Club')+
+  table(['Club','Teacher','Days','Members','Action'],[
+    ['Science Club','Mr. Mensah','Tuesdays','18',btn('Join','pnl-btn-green',"showToast('Request to join Science Club sent.','success')")],
+    ['Debate Club','Mrs. Addo','Thursdays','14',btn('Join','pnl-btn-green',"showToast('Request to join Debate Club sent.','success')")],
+    ['Drama Club','Mr. Asante','Mondays','22',btn('Join','pnl-btn-green',"showToast('Request to join Drama Club sent.','success')")],
+    ['Football Team','Mr. Darko','Wednesdays','20',btn('Join','pnl-btn-green',"showToast('Request to join Football Team sent.','success')")],
+  ])
+},
+
+/* ── My Profile ── */
+'my-profile': { title:'&#128100; My Profile',
+  html: card(
+    '<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">'+
+    '<div style="width:60px;height:60px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#fff;font-family:Fredoka One,cursive;">A</div>'+
+    '<div><div style="font-weight:800;color:var(--navy);font-size:1rem;">Amara Mensah</div><div style="font-size:0.8rem;color:#6b7280;">Student · Primary 4A · ID: STU-0042</div></div></div>'+
+    field('Full Name','text','','Amara Kofi Mensah')+
+    field('Date of Birth','date','','2015-03-14')+
+    field('Parent/Guardian','text','','Mrs. Abena Mensah')+
+    field('Phone','tel','','+233 24 456 7890')+
+    field('Address','text','','12 Rose Ave, East Legon, Accra')+
+    row([btn('Update Profile','pnl-btn-green',"showToast('Profile updated successfully.','success')")])
+  ,'#f0f4ff')
+},
+
+};})(window._h);
+</script>
+<script>
+  /* ── Auth guard: redirect to login if not authenticated ── */
+  (async () => {
+    const user = await UTOL.requireAuth('student');
+    if (!user) return; /* requireAuth handles redirect */
+  })();
+  /* ---- Sidebar toggle ---- */
+  document.getElementById('sidebarToggle').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+
+  /* ---- Mark "NOW" class with live time indicator ---- */
+  (function markCurrentClass() {
+    const now = new Date();
+    const h = now.getHours(), m = now.getMinutes();
+    const current = h * 60 + m;
+
+    const schedule = [
+      { start: 7*60+30,  end: 8*60,    idx: 0 },
+      { start: 8*60,     end: 9*60,    idx: 1 },
+      { start: 9*60,     end: 10*60,   idx: 2 },
+      { start: 10*60,    end: 10*60+20,idx: 3 },
+      { start: 10*60+20, end: 11*60+20,idx: 4 },
+      { start: 11*60+20, end: 12*60+20,idx: 5 },
+      { start: 12*60+20, end: 13*60,   idx: 6 },
+      { start: 13*60,    end: 14*60,   idx: 7 },
+      { start: 14*60,    end: 15*60,   idx: 8 },
+    ];
+
+    const items = document.querySelectorAll('.schedule-item');
+    schedule.forEach(s => {
+      if (current >= s.start && current < s.end && items[s.idx]) {
+        items[s.idx].style.background = '#eef0ff';
+        items[s.idx].style.borderLeft = '3px solid var(--navy)';
+      }
+    });
+  })();
+
+  /* ---- Grade bars animate on load ---- */
+  window.addEventListener('load', () => {
+    document.querySelectorAll('.grade-bar').forEach(bar => {
+      const target = bar.style.width;
+      bar.style.width = '0';
+      setTimeout(() => { bar.style.transition = 'width 0.8s ease'; bar.style.width = target; }, 200);
+    });
+    document.querySelectorAll('.goal-fill').forEach(fill => {
+      const target = fill.style.width;
+      fill.style.width = '0';
+      setTimeout(() => { fill.style.transition = 'width 0.8s ease'; fill.style.width = target; }, 400);
+    });
+    document.querySelectorAll('.term-progress-fill').forEach(fill => {
+      const target = fill.style.width;
+      fill.style.width = '0';
+      setTimeout(() => { fill.style.transition = 'width 1s ease'; fill.style.width = target; }, 300);
+    });
+  });
+
+
+
+</script>
+
+</body>
+</html>
